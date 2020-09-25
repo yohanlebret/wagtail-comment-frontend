@@ -17,18 +17,15 @@
         "src/api.ts",
         "src/components/Comment/index.tsx",
         "src/components/CommentReply/index.tsx",
-        "src/components/ModerationBar/index.tsx",
         "src/components/TopBar/index.tsx",
         "src/utils/annotation.ts",
         "src/utils/layout.ts",
         "src/utils/sequences.ts",
         "src/actions/index.ts",
         "src/actions/comments.ts",
-        "src/actions/moderation.ts",
         "src/actions/settings.ts",
         "src/state/index.ts",
         "src/state/comments.ts",
-        "src/state/moderation.ts",
         "src/state/settings.ts",
         "src/custom.d.ts"
     ]

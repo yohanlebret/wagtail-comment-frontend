@@ -14,7 +14,6 @@ import {
     newCommentReply,
     newComment
 } from './state/comments';
-import { ModerationState } from './state/moderation';
 import {
     addComment,
     addReply,
@@ -24,7 +23,6 @@ import {
 } from './actions/comments';
 import CommentComponent from './components/Comment';
 import TopBarComponent from './components/TopBar';
-import ModerationBarComponent from './components/ModerationBar';
 
 import * as styles from '!css-to-string-loader!css-loader!sass-loader!./main.scss';
 import { updateGlobalSettings } from './actions/settings';
@@ -34,8 +32,6 @@ function renderCommentsUi(
     api: APIClient,
     layout: LayoutController,
     comments: Comment[],
-    moderationEnabled: boolean,
-    moderationState: ModerationState
 ): React.ReactElement {
     let {
         commentsEnabled,
@@ -65,18 +61,6 @@ function renderCommentsUi(
         />
     ));
 
-    let moderationBar = <></>;
-
-    if (moderationEnabled) {
-        moderationBar = (
-            <ModerationBarComponent
-                store={store}
-                api={api}
-                {...moderationState}
-            />
-        );
-    }
-
     return (
         <root.div>
             <link
@@ -86,7 +70,6 @@ function renderCommentsUi(
             <style dangerouslySetInnerHTML={{ __html: styles }} />
             <TopBarComponent store={store} />
             <ol className="comments-list">{commentsRendered}</ol>
-            {moderationBar}
         </root.div>
     );
 }
@@ -100,7 +83,6 @@ export function initCommentsApp(
             element: HTMLElement
         ) => void
     ) => void,
-    moderationEnabled: boolean
 ) {
     let annotatableSections: { [contentPath: string]: AnnotatableSection } = {};
     let focusedComment: number | null = null;
@@ -179,8 +161,6 @@ export function initCommentsApp(
                 api,
                 layout,
                 commentList,
-                moderationEnabled,
-                state.moderation
             ),
             element,
             () => {
@@ -195,8 +175,6 @@ export function initCommentsApp(
                             api,
                             layout,
                             commentList,
-                            moderationEnabled,
-                            state.moderation
                         ),
                         element
                     );

@@ -1,5 +1,4 @@
 import { Comment, CommentReply } from './state/comments';
-import { ModerationTaskAction } from './state/moderation';
 
 export interface ReviewerApi {
     id: number;
@@ -33,11 +32,6 @@ export interface CommentApi {
     start_offset: number;
     end_xpath: string;
     end_offset: number;
-}
-
-export interface ModerationRespondApi {
-    taskAction: ModerationTaskAction;
-    comment: string;
 }
 
 export default class APIClient {
@@ -197,31 +191,5 @@ export default class APIClient {
                 );
             }
         }
-    }
-
-    async extendModerationLock() {
-        await fetch(`${this.baseUrl}moderation/lock/`, {
-            method: 'PUT',
-            headers: {
-                'X-Review-Token': this.reviewToken
-            }
-        });
-    }
-
-    async submitModerationResponse(
-        taskAction: ModerationTaskAction,
-        comment: string
-    ) {
-        await fetch(`${this.baseUrl}respond/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Review-Token': this.reviewToken
-            },
-            body: JSON.stringify(<ModerationRespondApi>{
-                taskAction,
-                comment
-            })
-        });
     }
 }
