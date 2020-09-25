@@ -42,7 +42,7 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'wagtail-review-ui.js',
+    filename: 'wagtail-comment-frontend.js',
     libraryTarget: 'umd'
   }
 };
