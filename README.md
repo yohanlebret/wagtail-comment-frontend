@@ -1,5 +1,5 @@
-# wagtail-review-ui
+# wagtail-comment-frontend
 
 Frontend UI for adding comments on Wagtail pages
 
-**Note:** This is bundled with the [`wagtail-review`](https://github.com/wagtail/wagtail-review) package, you only need to install this separately if you are developing a headless site.
+**Note:** This is being reworked from a previous app, wagtail-review-ui, to work for in editor commenting instead. It is a work in progress and is not yet suitable for use.
