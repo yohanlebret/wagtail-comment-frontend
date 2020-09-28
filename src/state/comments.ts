@@ -1,6 +1,5 @@
 import { Annotation } from '../utils/annotation';
 import * as actions from '../actions/comments';
-import { ReviewerApi as AuthorApi } from '../api';
 
 type Partial<T> = {
     [P in keyof T]?: T[P];
@@ -9,13 +8,6 @@ type Partial<T> = {
 export interface Author {
     id: number;
     name: string;
-}
-
-export function authorFromApi(data: AuthorApi): Author {
-    return {
-        id: data.id,
-        name: data.name
-    };
 }
 
 export type CommentReplyMode =

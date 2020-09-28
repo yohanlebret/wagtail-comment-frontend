@@ -1,7 +1,5 @@
 import * as React from 'react';
 
-import APIClient from '../api';
-
 import { Store } from '../state';
 import {
     addComment,
@@ -12,7 +10,6 @@ import {
 import {
     Author,
     Comment,
-    authorFromApi,
     NewCommentOptions,
     newComment,
     newCommentReply,
@@ -49,13 +46,12 @@ export function RenderCommentsForStorybook({
     });
 
     let layout = new LayoutController();
-    const api = new APIClient('http://wagtail.io', 'dummy-review-token');
 
     if (!author) {
-        author = authorFromApi({
+        author = {
             id: 1,
             name: 'Admin'
-        });
+        };
     }
 
     let commentsToRender: Comment[] = Array.from(
@@ -66,7 +62,6 @@ export function RenderCommentsForStorybook({
         <CommentComponent
             key={comment.localId}
             store={store}
-            api={api}
             layout={layout}
             user={author}
             comment={comment}
@@ -93,11 +88,10 @@ export function addTestComment(
     let commentId = getNextCommentId();
 
     let author =
-        options.author ||
-        authorFromApi({
+        options.author ||{
             id: 1,
             name: 'Admin'
-        });
+        };
 
     // We must have a remoteId unless the comment is being created
     if (options.mode != 'creating' && options.remoteId == undefined) {
@@ -133,10 +127,10 @@ export function addTestReply(
 ) {
     let author =
         options.author ||
-        authorFromApi({
+        {
             id: 1,
             name: 'Admin'
-        });
+        };
 
     if (!options.remoteId) {
         options.remoteId = 1;

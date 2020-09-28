@@ -6,7 +6,6 @@ import { Store } from '../../state';
 import {
     Author,
     Comment,
-    authorFromApi,
     newCommentReply
 } from '../../state/comments';
 import {
@@ -16,13 +15,12 @@ import {
     addReply,
     setPinnedComment
 } from '../../actions/comments';
-import APIClient from '../../api';
 import { LayoutController } from '../../utils/layout';
 import { getNextReplyId } from '../../utils/sequences';
 import CommentReplyComponent, { saveCommentReply } from '../CommentReply';
 import Checkbox from '../widgets/Checkbox';
 
-async function saveComment(comment: Comment, store: Store, api: APIClient) {
+async function saveComment(comment: Comment, store: Store) {
     store.dispatch(
         updateComment(comment.localId, {
             mode: 'saving'
@@ -30,14 +28,13 @@ async function saveComment(comment: Comment, store: Store, api: APIClient) {
     );
 
     try {
-        let commentData = await api.saveComment(comment);
 
         store.dispatch(
             updateComment(comment.localId, {
                 mode: 'default',
-                remoteId: commentData.id,
-                author: authorFromApi(commentData.author),
-                date: Date.parse(commentData.created_at)
+                remoteId: comment.id,
+                author: comment.author,
+                date: Date.parse(comment.created_at)
             })
         );
     } catch (err) {
@@ -50,7 +47,7 @@ async function saveComment(comment: Comment, store: Store, api: APIClient) {
     }
 }
 
-async function doDeleteComment(comment: Comment, store: Store, api: APIClient) {
+async function doDeleteComment(comment: Comment, store: Store) {
     store.dispatch(
         updateComment(comment.localId, {
             mode: 'deleting'
@@ -58,8 +55,6 @@ async function doDeleteComment(comment: Comment, store: Store, api: APIClient) {
     );
 
     try {
-        await api.deleteComment(comment);
-
         store.dispatch(deleteComment(comment.localId));
 
         if (comment.annotation) {
@@ -78,7 +73,6 @@ async function doDeleteComment(comment: Comment, store: Store, api: APIClient) {
 export interface CommentProps {
     store: Store;
     comment: Comment;
-    api: APIClient;
     layout: LayoutController;
     user: Author;
 }
@@ -98,7 +92,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
     }
 
     renderReplies({ hideNewReply = false } = {}): React.ReactFragment {
-        let { comment, store, api, user } = this.props;
+        let { comment, store, user } = this.props;
 
         if (!comment.remoteId) {
             // Hide replies UI if the comment itself isn't saved yet
@@ -131,7 +125,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
                 })
             );
 
-            await saveCommentReply(comment, reply, store, api);
+            await saveCommentReply(comment, reply, store);
         };
 
         let onClickCancelReply = (e: React.MouseEvent) => {
@@ -155,7 +149,6 @@ export default class CommentComponent extends React.Component<CommentProps> {
                 <CommentReplyComponent
                     key={reply.localId}
                     store={store}
-                    api={api}
                     user={user}
                     comment={comment}
                     reply={reply}
@@ -211,7 +204,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
     }
 
     renderCreating(): React.ReactFragment {
-        let { comment, store, api } = this.props;
+        let { comment, store } = this.props;
 
         let onChangeText = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
             e.preventDefault();
@@ -225,7 +218,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
 
         let onSave = async (e: React.MouseEvent) => {
             e.preventDefault();
-            await saveComment(comment, store, api);
+            await saveComment(comment, store);
         };
 
         let onCancel = (e: React.MouseEvent) => {
@@ -263,7 +256,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
     }
 
     renderEditing(): React.ReactFragment {
-        let { comment, store, api } = this.props;
+        let { comment, store } = this.props;
 
         let onChangeText = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
             e.preventDefault();
@@ -278,7 +271,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
         let onSave = async (e: React.MouseEvent) => {
             e.preventDefault();
 
-            await saveComment(comment, store, api);
+            await saveComment(comment, store);
         };
 
         let onCancel = (e: React.MouseEvent) => {
@@ -338,12 +331,12 @@ export default class CommentComponent extends React.Component<CommentProps> {
     }
 
     renderSaveError(): React.ReactFragment {
-        let { comment, store, api } = this.props;
+        let { comment, store } = this.props;
 
         let onClickRetry = async (e: React.MouseEvent) => {
             e.preventDefault();
 
-            await saveComment(comment, store, api);
+            await saveComment(comment, store);
         };
 
         return (
@@ -362,12 +355,12 @@ export default class CommentComponent extends React.Component<CommentProps> {
     }
 
     renderDeleteConfirm(): React.ReactFragment {
-        let { comment, store, api } = this.props;
+        let { comment, store } = this.props;
 
         let onClickDelete = async (e: React.MouseEvent) => {
             e.preventDefault();
 
-            await doDeleteComment(comment, store, api);
+            await doDeleteComment(comment, store);
         };
 
         let onClickCancel = (e: React.MouseEvent) => {
@@ -415,12 +408,12 @@ export default class CommentComponent extends React.Component<CommentProps> {
     }
 
     renderDeleteError(): React.ReactFragment {
-        let { comment, store, api } = this.props;
+        let { comment, store } = this.props;
 
         let onClickRetry = async (e: React.MouseEvent) => {
             e.preventDefault();
 
-            await doDeleteComment(comment, store, api);
+            await doDeleteComment(comment, store);
         };
 
         let onClickCancel = async (e: React.MouseEvent) => {
@@ -452,7 +445,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
     }
 
     renderDefault(): React.ReactFragment {
-        let { comment, store, api } = this.props;
+        let { comment, store } = this.props;
 
         let onClickEdit = async (e: React.MouseEvent) => {
             e.preventDefault();
@@ -485,8 +478,6 @@ export default class CommentComponent extends React.Component<CommentProps> {
                     resolvedThisSession: true
                 })
             );
-
-            await api.saveCommentResolvedStatus(comment, resolvedAt !== null);
 
             store.dispatch(
                 updateComment(comment.localId, {

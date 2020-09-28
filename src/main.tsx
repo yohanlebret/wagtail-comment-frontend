@@ -3,14 +3,12 @@ import * as ReactDOM from 'react-dom';
 import { createStore } from 'redux';
 import root from 'react-shadow';
 
-import APIClient from './api';
 import { Annotation, AnnotatableSection } from './utils/annotation';
 import { LayoutController } from './utils/layout';
 import { getNextCommentId, getNextReplyId } from './utils/sequences';
 import { Store, reducer } from './state';
 import {
     Comment,
-    authorFromApi,
     newCommentReply,
     newComment
 } from './state/comments';
@@ -29,7 +27,6 @@ import { updateGlobalSettings } from './actions/settings';
 
 function renderCommentsUi(
     store: Store,
-    api: APIClient,
     layout: LayoutController,
     comments: Comment[],
 ): React.ReactElement {
@@ -54,7 +51,6 @@ function renderCommentsUi(
         <CommentComponent
             key={comment.localId}
             store={store}
-            api={api}
             layout={layout}
             user={user}
             comment={comment}
@@ -76,7 +72,6 @@ function renderCommentsUi(
 
 export function initCommentsApp(
     element: HTMLElement,
-    api: APIClient,
     addAnnotatableSections: (
         addAnnotatableSection: (
             contentPath: string,
@@ -91,13 +86,6 @@ export function initCommentsApp(
     let store: Store = createStore(reducer);
     let layout = new LayoutController();
 
-    api.fetchBase().then(data => {
-        store.dispatch(
-            updateGlobalSettings({
-                user: authorFromApi(data.you)
-            })
-        );
-    });
 
     // Check if there is "comment" query parameter.
     // If this is set, the user has clicked on a "View on frontend" link of an
@@ -158,7 +146,6 @@ export function initCommentsApp(
         ReactDOM.render(
             renderCommentsUi(
                 store,
-                api,
                 layout,
                 commentList,
             ),
@@ -172,7 +159,6 @@ export function initCommentsApp(
                     ReactDOM.render(
                         renderCommentsUi(
                             store,
-                            api,
                             layout,
                             commentList,
                         ),
@@ -227,7 +213,7 @@ export function initCommentsApp(
     });
 
     // Fetch existing comments
-    api.fetchAllComments().then(comments => {
+    fetchAllComments().then(comments => {
         for (let comment of comments) {
             let section = annotatableSections[comment.content_path];
             if (!section) {
@@ -264,7 +250,7 @@ export function initCommentsApp(
                     newComment(
                         commentId,
                         annotation,
-                        authorFromApi(comment.author),
+                        comment.author,
                         Date.parse(comment.created_at),
                         {
                             remoteId: comment.id,
@@ -284,7 +270,7 @@ export function initCommentsApp(
                         commentId,
                         newCommentReply(
                             getNextReplyId(),
-                            authorFromApi(reply.author),
+                            reply.author,
                             Date.parse(reply.created_at),
                             { remoteId: reply.id, text: reply.text }
                         )
@@ -328,4 +314,3 @@ export function initCommentsApp(
     });
 }
 
-export { default as APIClient } from './api';
