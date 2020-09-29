@@ -1,6 +1,6 @@
 {
   "name": "wagtail-comment-frontend",
-  "version": "0.3.0",
+  "version": "0.0.1",
   "description": "Frontend UI for adding comments on Wagtail pages",
   "main": "dist/wagtail-comment-frontend.js",
   "types": "dist/types/main.d.ts",
