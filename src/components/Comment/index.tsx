@@ -32,9 +32,9 @@ async function saveComment(comment: Comment, store: Store) {
         store.dispatch(
             updateComment(comment.localId, {
                 mode: 'default',
-                remoteId: comment.id,
+                remoteId: comment.remoteId,
                 author: comment.author,
-                date: Date.parse(comment.created_at)
+                date: comment.date
             })
         );
     } catch (err) {

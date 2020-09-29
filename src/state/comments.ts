@@ -77,7 +77,7 @@ export interface Comment {
     mode: CommentMode;
     resolvedAt: number | null;
     author: Author | null;
-    date: number;
+    date: number | null;
     text: string;
     replies: Map<number, CommentReply>;
     newReply: string;

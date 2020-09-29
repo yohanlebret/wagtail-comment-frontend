@@ -8,6 +8,7 @@ import { LayoutController } from './utils/layout';
 import { getNextCommentId, getNextReplyId } from './utils/sequences';
 import { Store, reducer } from './state';
 import {
+    Author,
     Comment,
     newCommentReply,
     newComment
@@ -23,7 +24,32 @@ import CommentComponent from './components/Comment';
 import TopBarComponent from './components/TopBar';
 
 import * as styles from '!css-to-string-loader!css-loader!sass-loader!./main.scss';
-import { updateGlobalSettings } from './actions/settings';
+
+
+export interface InitialCommentReply {
+    id: number;
+    author: Author;
+    text: string;
+    created_at: string;
+    updated_at: string;
+}
+
+
+export interface InitialComment {
+    id: number;
+    author: Author;
+    quote: string;
+    text: string;
+    created_at: string;
+    updated_at: string;
+    resolved_at: string;
+    replies: InitialCommentReply[];
+    content_path: string;
+    start_xpath: string;
+    start_offset: number;
+    end_xpath: string;
+    end_offset: number;
+}
 
 function renderCommentsUi(
     store: Store,
@@ -72,6 +98,8 @@ function renderCommentsUi(
 
 export function initCommentsApp(
     element: HTMLElement,
+    author: Author,
+    initialComments: InitialComment[],
     addAnnotatableSections: (
         addAnnotatableSection: (
             contentPath: string,
@@ -83,7 +111,11 @@ export function initCommentsApp(
     let focusedComment: number | null = null;
     let pinnedComment: number | null = null;
 
-    let store: Store = createStore(reducer);
+    let store: Store = createStore(reducer, {settings: {
+        user: author,
+        commentsEnabled: true,
+        showResolvedComments: false
+    }});
     let layout = new LayoutController();
 
 
@@ -213,89 +245,88 @@ export function initCommentsApp(
     });
 
     // Fetch existing comments
-    fetchAllComments().then(comments => {
-        for (let comment of comments) {
-            let section = annotatableSections[comment.content_path];
-            if (!section) {
-                continue;
-            }
+    for (let comment of initialComments) {
+        let section = annotatableSections[comment.content_path];
+        if (!section) {
+            continue;
+        }
 
-            // Create annotation
-            let annotation = section.addAnnotation({
-                quote: comment.quote,
-                ranges: [
+        // Create annotation
+        let annotation = section.addAnnotation({
+            quote: comment.quote,
+            ranges: [
+                {
+                    start: comment.start_xpath,
+                    startOffset: comment.start_offset,
+                    end: comment.end_xpath,
+                    endOffset: comment.end_offset
+                }
+            ]
+        });
+
+        let commentId = getNextCommentId();
+
+        // Focus and pin comment when annotation is clicked
+        annotation.setOnClickHandler(() => {
+            store.dispatch(setFocusedComment(commentId));
+            store.dispatch(setPinnedComment(commentId));
+        });
+
+        // Let layout engine know the annotation so it would position the comment correctly
+        layout.setCommentAnnotation(commentId, annotation);
+
+        // Create comment
+        store.dispatch(
+            addComment(
+                newComment(
+                    commentId,
+                    annotation,
+                    comment.author,
+                    Date.parse(comment.created_at),
                     {
-                        start: comment.start_xpath,
-                        startOffset: comment.start_offset,
-                        end: comment.end_xpath,
-                        endOffset: comment.end_offset
+                        remoteId: comment.id,
+                        resolvedAt: comment.resolved_at
+                            ? Date.parse(comment.resolved_at)
+                            : null,
+                        text: comment.text
                     }
-                ]
-            });
+                )
+            )
+        );
 
-            let commentId = getNextCommentId();
-
-            // Focus and pin comment when annotation is clicked
-            annotation.setOnClickHandler(() => {
-                store.dispatch(setFocusedComment(commentId));
-                store.dispatch(setPinnedComment(commentId));
-            });
-
-            // Let layout engine know the annotation so it would position the comment correctly
-            layout.setCommentAnnotation(commentId, annotation);
-
-            // Create comment
+        // Create replies
+        for (let reply of comment.replies) {
             store.dispatch(
-                addComment(
-                    newComment(
-                        commentId,
-                        annotation,
-                        comment.author,
-                        Date.parse(comment.created_at),
-                        {
-                            remoteId: comment.id,
-                            resolvedAt: comment.resolved_at
-                                ? Date.parse(comment.resolved_at)
-                                : null,
-                            text: comment.text
-                        }
+                addReply(
+                    commentId,
+                    newCommentReply(
+                        getNextReplyId(),
+                        reply.author,
+                        Date.parse(reply.created_at),
+                        { remoteId: reply.id, text: reply.text }
                     )
                 )
             );
+        }
 
-            // Create replies
-            for (let reply of comment.replies) {
+        // If this is the initial focused comment. Focus and pin it
+        // TODO: Scroll to this comment
+        if (
+            initialFocusedCommentId &&
+            comment.id == initialFocusedCommentId
+        ) {
+            store.dispatch(setFocusedComment(commentId));
+            store.dispatch(setPinnedComment(commentId));
+
+            // HACK: If the comment is resolved. Set that comments "resolvedInThisSession" field so it displays
+            if (comment.resolved_at !== null) {
                 store.dispatch(
-                    addReply(
-                        commentId,
-                        newCommentReply(
-                            getNextReplyId(),
-                            reply.author,
-                            Date.parse(reply.created_at),
-                            { remoteId: reply.id, text: reply.text }
-                        )
-                    )
+                    updateComment(commentId, { resolvedThisSession: true })
                 );
             }
-
-            // If this is the initial focused comment. Focus and pin it
-            // TODO: Scroll to this comment
-            if (
-                initialFocusedCommentId &&
-                comment.id == initialFocusedCommentId
-            ) {
-                store.dispatch(setFocusedComment(commentId));
-                store.dispatch(setPinnedComment(commentId));
-
-                // HACK: If the comment is resolved. Set that comments "resolvedInThisSession" field so it displays
-                if (comment.resolved_at !== null) {
-                    store.dispatch(
-                        updateComment(commentId, { resolvedThisSession: true })
-                    );
-                }
-            }
         }
-    });
+    }
+
 
     // Unfocus when document body is clicked
     document.body.addEventListener('click', e => {

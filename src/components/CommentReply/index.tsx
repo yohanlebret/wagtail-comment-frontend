@@ -25,9 +25,7 @@ export async function saveCommentReply(
         store.dispatch(
             updateReply(comment.localId, reply.localId, {
                 mode: 'default',
-                remoteId: reply.id,
                 author: reply.author,
-                date: Date.parse(reply.created_at)
             })
         );
     } catch (err) {
