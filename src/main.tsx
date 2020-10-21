@@ -220,7 +220,7 @@ export function initCommentsApp(
         // Create the comment
         store.dispatch(
             addComment(
-                newComment(commentId, annotation, null, Date.now(), {
+                newComment(commentId, annotation, store.getState().settings.user, Date.now(), {
                     mode: 'creating'
                 })
             )
