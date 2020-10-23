@@ -19,6 +19,7 @@ import { LayoutController } from '../../utils/layout';
 import { getNextReplyId } from '../../utils/sequences';
 import CommentReplyComponent, { saveCommentReply } from '../CommentReply';
 import Checkbox from '../widgets/Checkbox';
+import { TranslatableStrings } from '../../main';
 
 async function saveComment(comment: Comment, store: Store) {
     store.dispatch(
@@ -75,6 +76,7 @@ export interface CommentProps {
     comment: Comment;
     layout: LayoutController;
     user: Author;
+    strings: TranslatableStrings;
 }
 
 export default class CommentComponent extends React.Component<CommentProps> {
@@ -92,7 +94,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
     }
 
     renderReplies({ hideNewReply = false } = {}): React.ReactFragment {
-        let { comment, store, user } = this.props;
+        let { comment, store, user, strings } = this.props;
 
         if (!comment.remoteId) {
             // Hide replies UI if the comment itself isn't saved yet
@@ -152,6 +154,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
                     user={user}
                     comment={comment}
                     reply={reply}
+                    strings={strings}
                 />
             );
         }
@@ -204,7 +207,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
     }
 
     renderCreating(): React.ReactFragment {
-        let { comment, store } = this.props;
+        let { comment, store, strings } = this.props;
 
         let onChangeText = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
             e.preventDefault();
@@ -245,10 +248,10 @@ export default class CommentComponent extends React.Component<CommentProps> {
                         onClick={onSave}
                         className="comment__button comment__button--primary"
                     >
-                        Save
+                        {strings.SAVE}
                     </button>
                     <button onClick={onCancel} className="comment__button">
-                        Cancel
+                        {strings.CANCEL}
                     </button>
                 </div>
             </>
@@ -256,7 +259,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
     }
 
     renderEditing(): React.ReactFragment {
-        let { comment, store } = this.props;
+        let { comment, store, strings } = this.props;
 
         let onChangeText = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
             e.preventDefault();
@@ -298,10 +301,10 @@ export default class CommentComponent extends React.Component<CommentProps> {
                         onClick={onSave}
                         className="comment__button comment__button--primary"
                     >
-                        Save
+                        {strings.SAVE}
                     </button>
                     <button onClick={onCancel} className="comment__button">
-                        Cancel
+                        {strings.CANCEL}
                     </button>
                     <div className="comment__resolved">
                         <Checkbox
@@ -318,20 +321,20 @@ export default class CommentComponent extends React.Component<CommentProps> {
     }
 
     renderSaving(): React.ReactFragment {
-        let { comment } = this.props;
+        let { comment, strings } = this.props;
 
         return (
             <>
                 <p className="comment__text">{comment.text}</p>
                 {this.renderAuthorDate()}
-                <div className="comment__progress">Saving...</div>
+                <div className="comment__progress">{strings.SAVING}</div>
                 {this.renderReplies({ hideNewReply: true })}
             </>
         );
     }
 
     renderSaveError(): React.ReactFragment {
-        let { comment, store } = this.props;
+        let { comment, store, strings } = this.props;
 
         let onClickRetry = async (e: React.MouseEvent) => {
             e.preventDefault();
@@ -345,9 +348,9 @@ export default class CommentComponent extends React.Component<CommentProps> {
                 {this.renderAuthorDate()}
                 {this.renderReplies({ hideNewReply: true })}
                 <div className="comment__error">
-                    Save error
+                    {strings.SAVE_ERROR}
                     <button className="comment__button" onClick={onClickRetry}>
-                        Retry
+                        {strings.RETRY}
                     </button>
                 </div>
             </>
@@ -355,7 +358,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
     }
 
     renderDeleteConfirm(): React.ReactFragment {
-        let { comment, store } = this.props;
+        let { comment, store, strings } = this.props;
 
         let onClickDelete = async (e: React.MouseEvent) => {
             e.preventDefault();
@@ -378,15 +381,15 @@ export default class CommentComponent extends React.Component<CommentProps> {
                 <p className="comment__text">{comment.text}</p>
                 {this.renderAuthorDate()}
                 <div className="comment__confirm-delete">
-                    Are you sure?
+                    {strings.CONFIRM_DELETE_COMMENT}
                     <button
                         className="comment__button comment__button--red"
                         onClick={onClickDelete}
                     >
-                        Delete
+                        {strings.DELETE}
                     </button>
                     <button className="comment__button" onClick={onClickCancel}>
-                        Cancel
+                        {strings.CANCEL}
                     </button>
                 </div>
                 {this.renderReplies({ hideNewReply: true })}
@@ -395,20 +398,20 @@ export default class CommentComponent extends React.Component<CommentProps> {
     }
 
     renderDeleting(): React.ReactFragment {
-        let { comment } = this.props;
+        let { comment, strings } = this.props;
 
         return (
             <>
                 <p className="comment__text">{comment.text}</p>
                 {this.renderAuthorDate()}
-                <div className="comment__progress">Deleting...</div>
+                <div className="comment__progress">{strings.DELETING}</div>
                 {this.renderReplies({ hideNewReply: true })}
             </>
         );
     }
 
     renderDeleteError(): React.ReactFragment {
-        let { comment, store } = this.props;
+        let { comment, store, strings } = this.props;
 
         let onClickRetry = async (e: React.MouseEvent) => {
             e.preventDefault();
@@ -432,12 +435,12 @@ export default class CommentComponent extends React.Component<CommentProps> {
                 {this.renderAuthorDate()}
                 {this.renderReplies({ hideNewReply: true })}
                 <div className="comment__error">
-                    Delete error
+                    {strings.DELETE_ERROR}
                     <button className="comment__button" onClick={onClickCancel}>
-                        Cancel
+                        {strings.CANCEL}
                     </button>
                     <button className="comment__button" onClick={onClickRetry}>
-                        Retry
+                        {strings.RETRY}
                     </button>
                 </div>
             </>
@@ -445,7 +448,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
     }
 
     renderDefault(): React.ReactFragment {
-        let { comment, store } = this.props;
+        let { comment, store, strings } = this.props;
 
         let onClickEdit = async (e: React.MouseEvent) => {
             e.preventDefault();
@@ -497,10 +500,10 @@ export default class CommentComponent extends React.Component<CommentProps> {
                         className="comment__button comment__button--primary"
                         onClick={onClickEdit}
                     >
-                        Edit
+                        {strings.EDIT}
                     </button>
                     <button className="comment__button" onClick={onClickDelete}>
-                        Delete
+                        {strings.DELETE}
                     </button>
                 </>
             );

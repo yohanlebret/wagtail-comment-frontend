@@ -25,6 +25,35 @@ import TopBarComponent from './components/TopBar';
 
 import * as styles from '!css-to-string-loader!css-loader!sass-loader!./main.scss';
 
+export interface TranslatableStrings {
+    SAVE: string;
+    SAVING: string;
+    CANCEL: string;
+    DELETE: string;
+    DELETING: string;
+    SHOW_RESOLVED_COMMENTS: string;
+    SHOW_COMMENTS: string;
+    EDIT: string;
+    RETRY: string;
+    DELETE_ERROR: string;
+    CONFIRM_DELETE_COMMENT: string;
+    SAVE_ERROR: string;
+}
+
+export const defaultStrings = {
+    SAVE: 'Save',
+    SAVING: 'Saving...',
+    CANCEL: 'Cancel',
+    DELETE: 'Delete',
+    DELETING: 'Deleting...',
+    SHOW_RESOLVED_COMMENTS: 'Show resolved comments',
+    SHOW_COMMENTS: 'Show comments',
+    EDIT: 'Edit',
+    RETRY: 'Retry',
+    DELETE_ERROR: 'Delete error',
+    CONFIRM_DELETE_COMMENT: 'Are you sure?',
+    SAVE_ERROR: 'Save error'
+}
 
 export interface InitialCommentReply {
     id: number;
@@ -55,6 +84,7 @@ function renderCommentsUi(
     store: Store,
     layout: LayoutController,
     comments: Comment[],
+    strings: TranslatableStrings
 ): React.ReactElement {
     let {
         commentsEnabled,
@@ -80,6 +110,7 @@ function renderCommentsUi(
             layout={layout}
             user={user}
             comment={comment}
+            strings={strings}
         />
     ));
 
@@ -90,7 +121,7 @@ function renderCommentsUi(
                 rel="stylesheet"
             />
             <style dangerouslySetInnerHTML={{ __html: styles }} />
-            <TopBarComponent store={store} />
+            <TopBarComponent store={store} strings={strings} />
             <ol className="comments-list">{commentsRendered}</ol>
         </root.div>
     );
@@ -106,6 +137,7 @@ export function initCommentsApp(
             element: HTMLElement
         ) => void
     ) => void,
+    strings: TranslatableStrings | null
 ) {
     let annotatableSections: { [contentPath: string]: AnnotatableSection } = {};
     let focusedComment: number | null = null;
@@ -117,6 +149,10 @@ export function initCommentsApp(
         showResolvedComments: false
     }});
     let layout = new LayoutController();
+
+    if (!strings) {
+        strings = defaultStrings;
+    }
 
 
     // Check if there is "comment" query parameter.
@@ -180,6 +216,7 @@ export function initCommentsApp(
                 store,
                 layout,
                 commentList,
+                strings
             ),
             element,
             () => {
@@ -193,6 +230,7 @@ export function initCommentsApp(
                             store,
                             layout,
                             commentList,
+                            strings
                         ),
                         element
                     );
