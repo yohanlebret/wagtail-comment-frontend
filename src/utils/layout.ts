@@ -44,25 +44,7 @@ export class LayoutController {
     updateDesiredPosition(commentId: number) {
         let annotation = this.commentAnnotations.get(commentId);
 
-        if (annotation.highlights.length === 0) {
-            return;
-        }
-
-        // Get average position
-        const sumOfPositions = annotation.highlights
-            .map(highlight => {
-                return (
-                    highlight.getBoundingClientRect().top +
-                    document.documentElement.scrollTop
-                );
-            })
-            .reduce((sum, position) => {
-                return sum + position;
-            });
-
-        const averagePosition = sumOfPositions / annotation.highlights.length;
-
-        this.commentDesiredPositions.set(commentId, averagePosition + OFFSET);
+        this.commentDesiredPositions.set(commentId, annotation.getDesiredPosition() + OFFSET);
     }
 
     refresh() {
