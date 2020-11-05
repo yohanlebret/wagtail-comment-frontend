@@ -11,7 +11,7 @@ export interface State {
 
 export let reducer = combineReducers({
     comments: commentsReducer,
-    settings: settingsReducer
+    settings: settingsReducer,
 });
 
 export type Store = Store<State, Action>;

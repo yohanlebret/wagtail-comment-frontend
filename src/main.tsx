@@ -20,10 +20,18 @@ import {
     updateComment,
     setPinnedComment
 } from './actions/comments';
+import { selectCommentsForContentPathFactory } from './selectors';
 import CommentComponent from './components/Comment';
 import TopBarComponent from './components/TopBar';
 
 import * as styles from '!css-to-string-loader!css-loader!sass-loader!./main.scss';
+
+export interface Widget {
+    contentPath: string;
+    setEnabled(enabled: boolean): void;
+    onChangeComments(comments: Comment[]): void;
+    getAnnotationForComment(comment: Comment): Annotation;
+}
 
 export interface TranslatableStrings {
     SAVE: string;
@@ -231,13 +239,10 @@ export function initCommentsApp(
 
     store.subscribe(render);
 
-    let remoteLocalIdMapping = new Map()
-
     // Fetch existing comments
     for (let comment of initialComments) {
 
         let commentId = getNextCommentId();
-        remoteLocalIdMapping.set(comment.id, commentId);
 
         // Create comment
         store.dispatch(
@@ -292,10 +297,6 @@ export function initCommentsApp(
         }
     }
 
-    let getCommentsForContentPath = (contentPath: string) => {
-        return Array.from(store.getState().comments.comments.values()).filter((comment: Comment) => comment.contentPath === contentPath);
-    }
-
     let attachAnnotationLayout = (annotation: Annotation, commentId: number) => {
         // Attach an annotation to an existing comment in the layout
 
@@ -329,26 +330,47 @@ export function initCommentsApp(
         store.dispatch(setPinnedComment(commentId));
     };
 
-    let connectCommentWithAnnotation = (annotation: Annotation, commentRemoteId: number) => {
-        // Connect an existing comment with an annotation
-        let commentId = remoteLocalIdMapping.get(commentRemoteId);
+    let registerWidget = (widget: Widget) => {
+        let state = store.getState()
+        let currentlyEnabled = state.settings.commentsEnabled;
+        widget.setEnabled(currentlyEnabled);
+        let unsubscribeWidgetEnable = store.subscribe(() => {
+            let previouslyEnabled = currentlyEnabled;
+            currentlyEnabled = store.getState().settings.commentsEnabled;
+            if (previouslyEnabled !== currentlyEnabled) {
+                widget.setEnabled(currentlyEnabled);
+            }
+        })
+        const selectCommentsForContentPath = selectCommentsForContentPathFactory(widget.contentPath)
+        let currentComments = selectCommentsForContentPath(state);
+        let unsubscribeWidgetComments = store.subscribe(() => {
+            let previousComments = currentComments;
+            currentComments = selectCommentsForContentPath(store.getState());
+            if (previousComments !== currentComments) {
+                widget.onChangeComments(currentComments);
+            }
+        })
+        state.comments.comments.forEach((comment) => {
+            if (comment.contentPath == widget.contentPath) {
+                const annotation = widget.getAnnotationForComment(comment);
+                attachAnnotationLayout(annotation, comment.localId);
+                store.dispatch(
+                    updateComment(
+                        comment.localId, {annotation: annotation}
+                    )
+                );
+            }
+        })
 
-        attachAnnotationLayout(annotation, commentId);
-
-        // Attach the annotation to the pre-existing comment
-        store.dispatch(
-            updateComment(
-                commentId, {annotation: annotation}
-            )
-        );
-    };
+        return {unsubscribeWidgetEnable, unsubscribeWidgetComments}
+    }
 
     // Unfocus when document body is clicked
     document.body.addEventListener('click', e => {
         if (e.target instanceof HTMLElement) {
-            // ignore if click target is a comment or a highlight
+            // ignore if click target is a comment or an annotation
             if (
-                !e.target.closest('#comments')
+                !e.target.closest('#comments, [data-annotation]')
             ) {
                 // Running store.dispatch directly here seems to prevent the event from being handled anywhere else
                 setTimeout(() => {
@@ -359,6 +381,6 @@ export function initCommentsApp(
         }
     });
 
-    return {makeComment: makeComment, connectCommentWithAnnotation: connectCommentWithAnnotation, getCommentsForContentPath: getCommentsForContentPath}
+    return {makeComment, registerWidget}
 }
 
