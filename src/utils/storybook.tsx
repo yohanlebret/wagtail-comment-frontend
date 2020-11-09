@@ -106,7 +106,7 @@ export function addTestComment(
     }
 
     store.dispatch(
-        addComment(newComment(commentId, null, author, Date.now(), options))
+        addComment(newComment('test', commentId, null, author, Date.now(), options))
     );
 
     if (options.focused) {
