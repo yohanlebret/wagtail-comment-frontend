@@ -47,7 +47,19 @@ export class LayoutController {
         this.commentDesiredPositions.set(commentId, annotation.getDesiredPosition() + OFFSET);
     }
 
+    refreshDesiredPositions() {
+        for (const commentId of this.commentAnnotations.keys()) {
+            this.updateDesiredPosition(commentId);
+          }
+    }
+
     refresh() {
+        const oldDesiredPositions = new Map(this.commentDesiredPositions);
+        this.refreshDesiredPositions()
+        if (this.commentDesiredPositions !== oldDesiredPositions) {
+            this.isDirty = true;
+        } 
+
         if (!this.isDirty) {
             return;
         }

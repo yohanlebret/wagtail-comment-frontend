@@ -218,9 +218,8 @@ export function initCommentsApp(
             () => {
                 // Render again if layout has changed (eg, a comment was added, deleted or resized)
                 // This will just update the "top" style attributes in the comments to get them to move
+                layout.refresh()
                 if (layout.isDirty) {
-                    layout.refresh();
-
                     ReactDOM.render(
                         renderCommentsUi(
                             store,
