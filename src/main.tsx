@@ -31,6 +31,7 @@ export interface Widget {
     setEnabled(enabled: boolean): void;
     onChangeComments(comments: Comment[]): void;
     getAnnotationForComment(comment: Comment): Annotation;
+    onRegister(makeComment: (annotation: Annotation, contentPath: string) => void): void
 }
 
 export interface TranslatableStrings {
@@ -360,6 +361,8 @@ export function initCommentsApp(
                 );
             }
         })
+
+        widget.onRegister(makeComment);
 
         return {unsubscribeWidgetEnable, unsubscribeWidgetComments}
     }
