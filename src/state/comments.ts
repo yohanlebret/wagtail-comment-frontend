@@ -6,7 +6,7 @@ type Partial<T> = {
 };
 
 export interface Author {
-    id: number;
+    id: any;
     name: string;
 }
 
