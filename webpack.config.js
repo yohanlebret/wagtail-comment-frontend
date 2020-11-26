@@ -36,7 +36,7 @@ module.exports = {
       }
     ]
   },
-  externals: ['annotator', 'react', 'react-dom'],
+  externals: ['react', 'react-dom'],
   resolve: {
     extensions: [ '.tsx', '.ts', '.js' ]
   },
