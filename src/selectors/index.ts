@@ -4,9 +4,9 @@ import type { State } from '../state'
 
 const getComments = (state: State) => state.comments.comments;
 
-export function selectCommentsForContentPathFactory (contentPath: string) {
+export function selectCommentsForContentPathFactory (contentpath: string) {
     return createSelector(
         getComments,
-        (comments) => [...comments.values()].filter((comment: Comment) => comment.contentPath === contentPath)
+        (comments) => [...comments.values()].filter((comment: Comment) => comment.contentpath === contentpath)
     )
 }

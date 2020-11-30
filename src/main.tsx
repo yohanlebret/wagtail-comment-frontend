@@ -8,7 +8,6 @@ import { LayoutController } from './utils/layout';
 import { getNextCommentId, getNextReplyId } from './utils/sequences';
 import { Store, reducer } from './state';
 import type {
-    Author,
     Comment,
 } from './state/comments';
 import {
@@ -29,11 +28,11 @@ import TopBarComponent from './components/TopBar';
 import * as styles from '!css-to-string-loader!css-loader!sass-loader!./main.scss';
 
 export interface Widget {
-    contentPath: string;
+    contentpath: string;
     setEnabled(enabled: boolean): void;
     onChangeComments(comments: Comment[]): void;
     getAnnotationForComment(comment: Comment): Annotation;
-    onRegister(makeComment: (annotation: Annotation, contentPath: string) => void): void
+    onRegister(makeComment: (annotation: Annotation, contentpath: string) => void): void
 }
 
 export interface TranslatableStrings {
@@ -69,8 +68,8 @@ export const defaultStrings = {
 }
 
 export interface InitialCommentReply {
-    id: number;
-    author: Author;
+    pk: number;
+    user: any;
     text: string;
     created_at: string;
     updated_at: string;
@@ -78,14 +77,14 @@ export interface InitialCommentReply {
 
 
 export interface InitialComment {
-    id: number;
-    author: Author;
+    pk: number;
+    user: any;
     text: string;
     created_at: string;
     updated_at: string;
     resolved_at: string;
     replies: InitialCommentReply[];
-    content_path: string;
+    contentpath: string;
 }
 
 function renderCommentsUi(
@@ -137,15 +136,20 @@ function renderCommentsUi(
 
 export function initCommentsApp(
     element: HTMLElement,
-    author: Author,
+    userId: any,
     initialComments: InitialComment[],
+    authors: Map<string, string>,
     strings: TranslatableStrings | null
 ) {
     let focusedComment: number | null = null;
     let pinnedComment: number | null = null;
+    const user = {
+        id: userId,
+        name: authors.get(String(userId))
+    }
 
     let store: Store = createStore(reducer, {settings: {
-        user: author,
+        user: user,
         commentsEnabled: true,
         showResolvedComments: false
     }});
@@ -223,8 +227,7 @@ export function initCommentsApp(
             () => {
                 // Render again if layout has changed (eg, a comment was added, deleted or resized)
                 // This will just update the "top" style attributes in the comments to get them to move
-                layout.refresh()
-                if (layout.isDirty) {
+                if (layout.refresh()) {
                     ReactDOM.render(
                         renderCommentsUi(
                             store,
@@ -252,13 +255,13 @@ export function initCommentsApp(
         store.dispatch(
             addComment(
                 newComment(
-                    comment.content_path,
+                    comment.contentpath,
                     commentId,
                     null,
-                    comment.author,
+                    {id: comment.user, name: authors.get(String(comment.user))},
                     Date.parse(comment.created_at),
                     {
-                        remoteId: comment.id,
+                        remoteId: comment.pk,
                         resolvedAt: comment.resolved_at
                             ? Date.parse(comment.resolved_at)
                             : null,
@@ -275,9 +278,9 @@ export function initCommentsApp(
                     commentId,
                     newCommentReply(
                         getNextReplyId(),
-                        reply.author,
+                        {id: reply.user, name: authors.get(String(reply.user))},
                         Date.parse(reply.created_at),
-                        { remoteId: reply.id, text: reply.text }
+                        { remoteId: reply.pk, text: reply.text }
                     )
                 )
             );
@@ -287,7 +290,7 @@ export function initCommentsApp(
         // TODO: Scroll to this comment
         if (
             initialFocusedCommentId &&
-            comment.id == initialFocusedCommentId
+            comment.pk == initialFocusedCommentId
         ) {
             store.dispatch(setFocusedComment(commentId));
             store.dispatch(setPinnedComment(commentId));
@@ -314,7 +317,7 @@ export function initCommentsApp(
         layout.setCommentAnnotation(commentId, annotation);
     };
 
-    let makeComment = (annotation: Annotation, contentPath: string) => {
+    let makeComment = (annotation: Annotation, contentpath: string) => {
         let commentId = getNextCommentId();
 
         attachAnnotationLayout(annotation, commentId);
@@ -322,7 +325,7 @@ export function initCommentsApp(
         // Create the comment
         store.dispatch(
             addComment(
-                newComment(contentPath, commentId, annotation, store.getState().settings.user, Date.now(), {
+                newComment(contentpath, commentId, annotation, store.getState().settings.user, Date.now(), {
                     mode: 'creating'
                 })
             )
@@ -345,7 +348,7 @@ export function initCommentsApp(
                 widget.setEnabled(currentlyEnabled);
             }
         })
-        const selectCommentsForContentPath = selectCommentsForContentPathFactory(widget.contentPath)
+        const selectCommentsForContentPath = selectCommentsForContentPathFactory(widget.contentpath)
         let currentComments = selectCommentsForContentPath(state);
         let unsubscribeWidgetComments = store.subscribe(() => {
             let previousComments = currentComments;
@@ -355,7 +358,7 @@ export function initCommentsApp(
             }
         })
         state.comments.comments.forEach((comment) => {
-            if (comment.contentPath == widget.contentPath) {
+            if (comment.contentpath == widget.contentpath) {
                 const annotation = widget.getAnnotationForComment(comment);
                 attachAnnotationLayout(annotation, comment.localId);
                 store.dispatch(

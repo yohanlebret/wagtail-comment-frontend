@@ -71,7 +71,7 @@ export type CommentMode =
     | 'delete_error';
 
 export interface Comment {
-    contentPath: string;
+    contentpath: string;
     localId: number;
     annotation: Annotation | null;
     remoteId: number | null;
@@ -97,7 +97,7 @@ export interface NewCommentOptions {
 }
 
 export function newComment(
-    contentPath: string,
+    contentpath: string,
     localId: number,
     annotation: Annotation | null,
     author: Author | null,
@@ -111,7 +111,7 @@ export function newComment(
     }: NewCommentOptions
 ): Comment {
     return {
-        contentPath,
+        contentpath,
         localId,
         annotation,
         remoteId,
