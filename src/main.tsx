@@ -23,6 +23,7 @@ import {
 } from './actions/comments';
 import { selectCommentsForContentPathFactory } from './selectors';
 import CommentComponent from './components/Comment';
+import { CommentFormSetComponent } from './components/Form'
 import TopBarComponent from './components/TopBar';
 
 import * as styles from '!css-to-string-loader!css-loader!sass-loader!./main.scss';
@@ -136,6 +137,7 @@ function renderCommentsUi(
 
 export function initCommentsApp(
     element: HTMLElement,
+    outputElement: HTMLElement,
     userId: any,
     initialComments: InitialComment[],
     authors: Map<string, string>,
@@ -174,6 +176,10 @@ export function initCommentsApp(
         let commentList: Comment[] = Array.from(
             state.comments.comments.values()
         );
+
+
+
+        ReactDOM.render(<CommentFormSetComponent comments={commentList} />, outputElement);
 
         // Check if the focused comment has changed
         if (state.comments.focusedComment != focusedComment) {
@@ -241,10 +247,6 @@ export function initCommentsApp(
             }
         );
     };
-
-    render();
-
-    store.subscribe(render);
 
     // Fetch existing comments
     for (let comment of initialComments) {
@@ -373,6 +375,10 @@ export function initCommentsApp(
 
         return {unsubscribeWidgetEnable, unsubscribeWidgetComments}
     }
+
+    render();
+
+    store.subscribe(render);
 
     // Unfocus when document body is clicked
     document.body.addEventListener('click', e => {
