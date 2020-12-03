@@ -1,4 +1,4 @@
-import { Annotation } from './annotation';
+import type { Annotation } from './annotation';
 
 const GAP = 20.0; // Gap between comments in pixels
 const TOP_MARGIN = 100.0; // Spacing from the top to the first comment in pixels

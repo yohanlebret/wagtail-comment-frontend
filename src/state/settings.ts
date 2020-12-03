@@ -1,5 +1,5 @@
 import * as actions from '../actions/settings';
-import { Author } from './comments';
+import type { Author } from './comments';
 
 type Partial<T> = {
     [P in keyof T]?: T[P];

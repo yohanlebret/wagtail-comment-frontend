@@ -3,13 +3,15 @@ import * as ReactDOM from 'react-dom';
 import { createStore } from 'redux';
 import root from 'react-shadow';
 
-import { Annotation } from './utils/annotation';
+import type { Annotation } from './utils/annotation';
 import { LayoutController } from './utils/layout';
 import { getNextCommentId, getNextReplyId } from './utils/sequences';
 import { Store, reducer } from './state';
-import {
+import type {
     Author,
     Comment,
+} from './state/comments';
+import {
     newCommentReply,
     newComment
 } from './state/comments';

@@ -2,12 +2,12 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import * as dateFormat from 'dateformat';
 
-import { Store } from '../../state';
-import {
+import type { Store } from '../../state';
+import type {
     Author,
     Comment,
-    newCommentReply
 } from '../../state/comments';
+import { newCommentReply } from '../../state/comments';
 import {
     updateComment,
     deleteComment,
@@ -19,7 +19,7 @@ import { LayoutController } from '../../utils/layout';
 import { getNextReplyId } from '../../utils/sequences';
 import CommentReplyComponent, { saveCommentReply } from '../CommentReply';
 import Checkbox from '../widgets/Checkbox';
-import { TranslatableStrings } from '../../main';
+import type { TranslatableStrings } from '../../main';
 
 async function saveComment(comment: Comment, store: Store) {
     store.dispatch(

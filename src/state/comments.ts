@@ -1,4 +1,4 @@
-import { Annotation } from '../utils/annotation';
+import type { Annotation } from '../utils/annotation';
 import * as actions from '../actions/comments';
 
 type Partial<T> = {

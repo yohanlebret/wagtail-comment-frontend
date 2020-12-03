@@ -1,14 +1,14 @@
 import * as React from 'react';
 import * as dateFormat from 'dateformat';
 
-import { Store } from '../../state';
-import {
+import type { Store } from '../../state';
+import type {
     Comment,
     CommentReply,
     Author,
 } from '../../state/comments';
 import { updateReply, deleteReply } from '../../actions/comments';
-import { TranslatableStrings } from '../../main';
+import type { TranslatableStrings } from '../../main';
 
 export async function saveCommentReply(
     comment: Comment,

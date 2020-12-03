@@ -1,10 +1,10 @@
 import * as React from 'react';
 
-import { Store } from '../../state';
+import type { Store } from '../../state';
 import { updateGlobalSettings } from '../../actions/settings';
 
 import Checkbox from '../widgets/Checkbox';
-import { TranslatableStrings } from '../../main';
+import type { TranslatableStrings } from '../../main';
 
 export interface TopBarProps {
     store: Store;
