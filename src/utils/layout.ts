@@ -48,9 +48,7 @@ export class LayoutController {
     }
 
     refreshDesiredPositions() {
-        for (const commentId of this.commentAnnotations.keys()) {
-            this.updateDesiredPosition(commentId);
-          }
+        this.commentAnnotations.forEach((_, commentId) => this.updateDesiredPosition(commentId));
     }
 
     refresh() {
