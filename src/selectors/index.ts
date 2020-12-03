@@ -7,6 +7,6 @@ const getComments = (state: State) => state.comments.comments;
 export function selectCommentsForContentPathFactory (contentPath: string) {
     return createSelector(
         getComments,
-        (comments: Map<number, Comment>) => [...comments.values()].filter((comment: Comment) => comment.contentPath === contentPath)
+        (comments) => [...comments.values()].filter((comment: Comment) => comment.contentPath === contentPath)
     )
 }
