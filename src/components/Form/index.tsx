@@ -74,7 +74,7 @@ export function CommentReplyFormComponent(props: CommentReplyFormComponentProps)
     return (<fieldset>
         <PrefixedHiddenInput
             fieldName="DELETE"
-            value="" // TODO:  Add deletions to this too in the future
+            value={reply.deleted ? 1 : ""}
             prefix={prefix}
         />
         <PrefixedHiddenInput
@@ -145,7 +145,7 @@ export function CommentFormComponent(props: CommentFormProps) {
     return (<fieldset>
         <PrefixedHiddenInput
             fieldName="DELETE"
-            value={comment.resolvedThisSession ? 1 : ""} // TODO:  Add deletions to this too in the future
+            value={comment.deleted ? 1 : ""}
             prefix={prefix}
         />
         <PrefixedHiddenInput

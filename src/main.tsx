@@ -42,10 +42,10 @@ export interface TranslatableStrings {
     CANCEL: string;
     DELETE: string;
     DELETING: string;
-    SHOW_RESOLVED_COMMENTS: string;
     SHOW_COMMENTS: string;
     EDIT: string;
     REPLY: string;
+    RESOLVE: string;
     RETRY: string;
     DELETE_ERROR: string;
     CONFIRM_DELETE_COMMENT: string;
@@ -58,10 +58,10 @@ export const defaultStrings = {
     CANCEL: 'Cancel',
     DELETE: 'Delete',
     DELETING: 'Deleting...',
-    SHOW_RESOLVED_COMMENTS: 'Show resolved comments',
     SHOW_COMMENTS: 'Show comments',
     EDIT: 'Edit',
     REPLY: 'Reply',
+    RESOLVE: 'Resolve',
     RETRY: 'Retry',
     DELETE_ERROR: 'Delete error',
     CONFIRM_DELETE_COMMENT: 'Are you sure?',
@@ -83,7 +83,6 @@ export interface InitialComment {
     text: string;
     created_at: string;
     updated_at: string;
-    resolved_at: string;
     replies: InitialCommentReply[];
     contentpath: string;
 }
@@ -96,21 +95,19 @@ function renderCommentsUi(
 ): React.ReactElement {
     let {
         commentsEnabled,
-        showResolvedComments,
         user
     } = store.getState().settings;
     let commentsToRender = comments;
 
     if (!commentsEnabled || !user) {
         commentsToRender = [];
-    } else if (!showResolvedComments) {
-        // Hide all resolved comments unless they were resolved this session
-        commentsToRender = commentsToRender.filter(comment => {
-            return !(
-                comment.resolvedAt !== null && !comment.resolvedThisSession
-            );
-        });
     }
+    // Hide all resolved/deleted comments
+    commentsToRender = commentsToRender.filter(comment => {
+        return (
+            comment.deleted == false
+        );
+    });
     let commentsRendered = commentsToRender.map(comment => (
         <CommentComponent
             key={comment.localId}
@@ -153,7 +150,6 @@ export function initCommentsApp(
     let store: Store = createStore(reducer, {settings: {
         user: user,
         commentsEnabled: true,
-        showResolvedComments: false
     }});
     let layout = new LayoutController();
 
@@ -264,9 +260,6 @@ export function initCommentsApp(
                     Date.parse(comment.created_at),
                     {
                         remoteId: comment.pk,
-                        resolvedAt: comment.resolved_at
-                            ? Date.parse(comment.resolved_at)
-                            : null,
                         text: comment.text
                     }
                 )
@@ -296,13 +289,6 @@ export function initCommentsApp(
         ) {
             store.dispatch(setFocusedComment(commentId));
             store.dispatch(setPinnedComment(commentId));
-
-            // HACK: If the comment is resolved. Set that comments "resolvedInThisSession" field so it displays
-            if (comment.resolved_at !== null) {
-                store.dispatch(
-                    updateComment(commentId, { resolvedThisSession: true })
-                );
-            }
         }
     }
 

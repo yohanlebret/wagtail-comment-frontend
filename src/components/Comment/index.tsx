@@ -18,7 +18,6 @@ import {
 import { LayoutController } from '../../utils/layout';
 import { getNextReplyId } from '../../utils/sequences';
 import CommentReplyComponent, { saveCommentReply } from '../CommentReply';
-import Checkbox from '../widgets/Checkbox';
 import type { TranslatableStrings } from '../../main';
 
 async function saveComment(comment: Comment, store: Store) {
@@ -147,16 +146,18 @@ export default class CommentComponent extends React.Component<CommentProps> {
                 replyBeingEdited = true;
             }
 
-            replies.push(
-                <CommentReplyComponent
-                    key={reply.localId}
-                    store={store}
-                    user={user}
-                    comment={comment}
-                    reply={reply}
-                    strings={strings}
-                />
-            );
+            if (!reply.deleted) {
+                replies.push(
+                    <CommentReplyComponent
+                        key={reply.localId}
+                        store={store}
+                        user={user}
+                        comment={comment}
+                        reply={reply}
+                        strings={strings}
+                    />
+                );
+            }
         }
 
         // Hide new reply if a reply is being edited
@@ -317,14 +318,6 @@ export default class CommentComponent extends React.Component<CommentProps> {
                             className="comment__button">
                             {strings.CANCEL}
                         </button>
-                        <div className="comment__resolved">
-                            <Checkbox
-                                id={`comment-${comment.localId}-resolved`}
-                                label="Resolved"
-                                checked={comment.resolvedAt !== null}
-                                disabled={true}
-                            />
-                        </div>
                     </div>
                 </form>
                 {this.renderReplies({ hideNewReply: true })}
@@ -500,22 +493,10 @@ export default class CommentComponent extends React.Component<CommentProps> {
             );
         };
 
-        let changeResolved = async (checked: boolean) => {
-            let resolvedAt = checked ? comment.resolvedAt || Date.now() : null;
+        const onClickResolve = async (e: React.MouseEvent) => {
+            e.preventDefault();
 
-            store.dispatch(
-                updateComment(comment.localId, {
-                    resolvedAt,
-                    updatingResolvedStatus: true,
-                    resolvedThisSession: true
-                })
-            );
-
-            store.dispatch(
-                updateComment(comment.localId, {
-                    updatingResolvedStatus: false
-                })
-            );
+            await doDeleteComment(comment, store);
         };
 
         let actions = <></>;
@@ -550,12 +531,13 @@ export default class CommentComponent extends React.Component<CommentProps> {
                 <div className="comment__actions">
                     {actions}
                     <div className="comment__resolved">
-                        <Checkbox
-                            id={`comment-${comment.localId}-resolved`}
-                            label="Resolved"
-                            checked={comment.resolvedAt !== null}
-                            onChange={changeResolved}
-                        />
+                        <button 
+                            type="button"
+                            className="comment__button"
+                            onClick={onClickResolve}
+                        >
+                            {strings.RESOLVE}
+                        </button>
                     </div>
                 </div>
                 {this.renderReplies()}

@@ -28,6 +28,7 @@ export interface CommentReply {
     date: number;
     text: string;
     editPreviousText: string;
+    deleted: boolean;
 }
 
 export interface NewReplyOptions {
@@ -53,7 +54,8 @@ export function newCommentReply(
         author,
         date,
         text,
-        editPreviousText: ''
+        editPreviousText: '',
+        deleted: false,
     };
 }
 
@@ -76,7 +78,7 @@ export interface Comment {
     annotation: Annotation | null;
     remoteId: number | null;
     mode: CommentMode;
-    resolvedAt: number | null;
+    deleted: boolean;
     author: Author | null;
     date: number | null;
     text: string;
@@ -84,14 +86,11 @@ export interface Comment {
     newReply: string;
     editPreviousText: string;
     isFocused: boolean;
-    updatingResolvedStatus: boolean;
-    resolvedThisSession: boolean;
 }
 
 export interface NewCommentOptions {
     remoteId?: number | null;
     mode?: CommentMode;
-    resolvedAt?: number | null;
     text?: string;
     replies?: Map<number, CommentReply>;
 }
@@ -105,7 +104,6 @@ export function newComment(
     {
         remoteId = <number | null>null,
         mode = <CommentMode>'default',
-        resolvedAt = <number | null>null,
         text = '',
         replies = <Map<number, CommentReply>>new Map()
     }: NewCommentOptions
@@ -116,7 +114,6 @@ export function newComment(
         annotation,
         remoteId,
         mode,
-        resolvedAt,
         author,
         date,
         text,
@@ -124,8 +121,7 @@ export function newComment(
         newReply: '',
         editPreviousText: '',
         isFocused: false,
-        updatingResolvedStatus: false,
-        resolvedThisSession: false
+        deleted: false,
     };
 }
 
@@ -190,7 +186,16 @@ export function reducer(
                 break;
             }
             state = cloneComments(state);
-            state.comments.delete(action.commentId);
+            if (!state.comments.get(action.commentId).remoteId) {
+                // If the comment doesn't exist in the database, there's no need to keep it around locally
+                state.comments.delete(action.commentId);
+            } else {
+                // Otherwise mark it as deleted so we can output this to the form to delete it on the backend too
+                state.comments.set(
+                    action.commentId,
+                    update(state.comments.get(action.commentId), {deleted: true})
+                );
+            }
 
             // Unset focusedComment if the focused comment is the one being deleted
             if (state.focusedComment == action.commentId) {
@@ -292,7 +297,21 @@ export function reducer(
                 action.commentId,
                 cloneReplies(state.comments.get(action.commentId))
             );
-            state.comments.get(action.commentId).replies.delete(action.replyId);
+            const reply = state.comments.get(action.commentId).replies.get(action.replyId)
+            if (!reply.remoteId) {
+                // The reply doesn't exist in the database, so we don't need to store it locally
+                state.comments.get(action.commentId).replies.delete(action.replyId);
+            } else {
+                state.comments
+                .get(action.commentId)
+                .replies.set(
+                    action.replyId,
+                    update(
+                        reply,
+                        {deleted: true}
+                    )
+                );
+            }
             break;
     }
 
