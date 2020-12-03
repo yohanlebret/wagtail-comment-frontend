@@ -43,6 +43,7 @@ export interface TranslatableStrings {
     SHOW_RESOLVED_COMMENTS: string;
     SHOW_COMMENTS: string;
     EDIT: string;
+    REPLY: string;
     RETRY: string;
     DELETE_ERROR: string;
     CONFIRM_DELETE_COMMENT: string;
@@ -58,6 +59,7 @@ export const defaultStrings = {
     SHOW_RESOLVED_COMMENTS: 'Show resolved comments',
     SHOW_COMMENTS: 'Show comments',
     EDIT: 'Edit',
+    REPLY: 'Reply',
     RETRY: 'Retry',
     DELETE_ERROR: 'Delete error',
     CONFIRM_DELETE_COMMENT: 'Are you sure?',

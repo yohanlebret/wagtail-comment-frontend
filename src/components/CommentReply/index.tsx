@@ -97,7 +97,7 @@ export default class CommentReplyComponent extends React.Component<
             );
         };
 
-        let onSave = async (e: React.MouseEvent) => {
+        let onSave = async (e: React.FormEvent) => {
             e.preventDefault();
             await saveCommentReply(comment, reply, store);
         };
@@ -114,7 +114,7 @@ export default class CommentReplyComponent extends React.Component<
         };
 
         return (
-            <>
+            <form onSubmit={onSave}>
                 <textarea
                     className="comment-reply__input"
                     value={reply.text}
@@ -123,19 +123,20 @@ export default class CommentReplyComponent extends React.Component<
                 />
                 <div className="comment-reply__actions">
                     <button
+                        type="submit"
                         className="comment-reply__button comment-reply__button--primary"
-                        onClick={onSave}
                     >
                         {strings.SAVE}
                     </button>
                     <button
+                        type="button"
                         className="comment-reply__button"
                         onClick={onCancel}
                     >
                         {strings.CANCEL}
                     </button>
                 </div>
-            </>
+            </form>
         );
     }
 
@@ -167,6 +168,7 @@ export default class CommentReplyComponent extends React.Component<
                 <div className="comment-reply__error">
                     {strings.SAVE_ERROR}
                     <button
+                        type="button"
                         className="comment-reply__button"
                         onClick={onClickRetry}
                     >
@@ -203,12 +205,14 @@ export default class CommentReplyComponent extends React.Component<
                 <div className="comment-reply__confirm-delete">
                     {strings.CONFIRM_DELETE_COMMENT}
                     <button
+                        type="button"
                         className="comment-reply__button comment-reply__button--red"
                         onClick={onClickDelete}
                     >
                         {strings.DELETE}
                     </button>
                     <button
+                        type="button"
                         className="comment-reply__button"
                         onClick={onClickCancel}
                     >
@@ -257,12 +261,14 @@ export default class CommentReplyComponent extends React.Component<
                 <div className="comment-reply__error">
                     {strings.DELETE_ERROR}
                     <button
+                        type="button"
                         className="comment-reply__button"
                         onClick={onClickCancel}
                     >
                         {strings.CANCEL}
                     </button>
                     <button
+                        type="button"
                         className="comment-reply__button"
                         onClick={onClickRetry}
                     >
@@ -302,12 +308,14 @@ export default class CommentReplyComponent extends React.Component<
             actions = (
                 <div className="comment-reply__actions">
                     <button
+                        type="button"
                         className="comment-reply__button comment-reply__button--primary"
                         onClick={onClickEdit}
                     >
                         {strings.EDIT}
                     </button>
                     <button
+                        type="button"
                         className="comment-reply__button"
                         onClick={onClickDelete}
                     >

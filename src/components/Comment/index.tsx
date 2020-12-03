@@ -111,7 +111,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
             );
         };
 
-        let onClickSendReply = async (e: React.MouseEvent) => {
+        const sendReply = async (e: React.FormEvent) => {
             e.preventDefault();
 
             let replyId = getNextReplyId();
@@ -169,16 +169,17 @@ export default class CommentComponent extends React.Component<CommentProps> {
             replyActions = (
                 <div className="comment__reply-actions">
                     <button
-                        onClick={onClickSendReply}
+                        type="submit"
                         className="comment__button comment__button--primary"
                     >
-                        Reply
+                        {strings.REPLY}
                     </button>
                     <button
+                        type="button"
                         onClick={onClickCancelReply}
                         className="comment__button"
                     >
-                        Cancel
+                        {strings.CANCEL}
                     </button>
                 </div>
             );
@@ -198,11 +199,11 @@ export default class CommentComponent extends React.Component<CommentProps> {
         }
 
         return (
-            <>
+            <form onSubmit={sendReply}>
                 <ul className="comment__replies">{replies}</ul>
                 {replyTextarea}
                 {replyActions}
-            </>
+            </form>
         );
     }
 
@@ -219,7 +220,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
             );
         };
 
-        let onSave = async (e: React.MouseEvent) => {
+        let onSave = async (e: React.FormEvent) => {
             e.preventDefault();
             await saveComment(comment, store);
         };
@@ -236,24 +237,30 @@ export default class CommentComponent extends React.Component<CommentProps> {
 
         return (
             <>
-                <textarea
-                    className="comment__input"
-                    value={comment.text}
-                    onChange={onChangeText}
-                    style={{ resize: 'none' }}
-                    placeholder="Enter your comments..."
-                />
-                <div className="comment__actions">
-                    <button
-                        onClick={onSave}
-                        className="comment__button comment__button--primary"
-                    >
-                        {strings.SAVE}
-                    </button>
-                    <button onClick={onCancel} className="comment__button">
-                        {strings.CANCEL}
-                    </button>
-                </div>
+                <form onSubmit={onSave}>
+                    <textarea
+                        className="comment__input"
+                        value={comment.text}
+                        onChange={onChangeText}
+                        style={{ resize: 'none' }}
+                        placeholder="Enter your comments..."
+                    />
+                    <div className="comment__actions">
+                        <button
+                            type="submit"
+                            className="comment__button comment__button--primary"
+                        >
+                            {strings.SAVE}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={onCancel} 
+                            className="comment__button"
+                        >
+                            {strings.CANCEL}
+                        </button>
+                    </div>
+                </form>
             </>
         );
     }
@@ -271,7 +278,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
             );
         };
 
-        let onSave = async (e: React.MouseEvent) => {
+        let onSave = async (e: React.FormEvent) => {
             e.preventDefault();
 
             await saveComment(comment, store);
@@ -290,31 +297,36 @@ export default class CommentComponent extends React.Component<CommentProps> {
 
         return (
             <>
-                <textarea
-                    className="comment__input"
-                    value={comment.text}
-                    onChange={onChangeText}
-                    style={{ resize: 'none' }}
-                />
-                <div className="comment__actions">
-                    <button
-                        onClick={onSave}
-                        className="comment__button comment__button--primary"
-                    >
-                        {strings.SAVE}
-                    </button>
-                    <button onClick={onCancel} className="comment__button">
-                        {strings.CANCEL}
-                    </button>
-                    <div className="comment__resolved">
-                        <Checkbox
-                            id={`comment-${comment.localId}-resolved`}
-                            label="Resolved"
-                            checked={comment.resolvedAt !== null}
-                            disabled={true}
-                        />
+                <form onSubmit={onSave}>
+                    <textarea
+                        className="comment__input"
+                        value={comment.text}
+                        onChange={onChangeText}
+                        style={{ resize: 'none' }}
+                    />
+                    <div className="comment__actions">
+                        <button
+                            type="submit"
+                            className="comment__button comment__button--primary"
+                        >
+                            {strings.SAVE}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={onCancel}
+                            className="comment__button">
+                            {strings.CANCEL}
+                        </button>
+                        <div className="comment__resolved">
+                            <Checkbox
+                                id={`comment-${comment.localId}-resolved`}
+                                label="Resolved"
+                                checked={comment.resolvedAt !== null}
+                                disabled={true}
+                            />
+                        </div>
                     </div>
-                </div>
+                </form>
                 {this.renderReplies({ hideNewReply: true })}
             </>
         );
@@ -349,7 +361,11 @@ export default class CommentComponent extends React.Component<CommentProps> {
                 {this.renderReplies({ hideNewReply: true })}
                 <div className="comment__error">
                     {strings.SAVE_ERROR}
-                    <button className="comment__button" onClick={onClickRetry}>
+                    <button
+                        type="button"
+                        className="comment__button"
+                        onClick={onClickRetry}
+                    >
                         {strings.RETRY}
                     </button>
                 </div>
@@ -383,12 +399,17 @@ export default class CommentComponent extends React.Component<CommentProps> {
                 <div className="comment__confirm-delete">
                     {strings.CONFIRM_DELETE_COMMENT}
                     <button
+                        type="button"
                         className="comment__button comment__button--red"
                         onClick={onClickDelete}
                     >
                         {strings.DELETE}
                     </button>
-                    <button className="comment__button" onClick={onClickCancel}>
+                    <button
+                        type="button"
+                        className="comment__button"
+                        onClick={onClickCancel}
+                    >
                         {strings.CANCEL}
                     </button>
                 </div>
@@ -436,10 +457,18 @@ export default class CommentComponent extends React.Component<CommentProps> {
                 {this.renderReplies({ hideNewReply: true })}
                 <div className="comment__error">
                     {strings.DELETE_ERROR}
-                    <button className="comment__button" onClick={onClickCancel}>
+                    <button
+                        type="button"
+                        className="comment__button"
+                        onClick={onClickCancel}
+                    >
                         {strings.CANCEL}
                     </button>
-                    <button className="comment__button" onClick={onClickRetry}>
+                    <button
+                        type="button"
+                        className="comment__button"
+                        onClick={onClickRetry}
+                    >
                         {strings.RETRY}
                     </button>
                 </div>
@@ -497,12 +526,17 @@ export default class CommentComponent extends React.Component<CommentProps> {
             actions = (
                 <>
                     <button
+                        type="button"
                         className="comment__button comment__button--primary"
                         onClick={onClickEdit}
                     >
                         {strings.EDIT}
                     </button>
-                    <button className="comment__button" onClick={onClickDelete}>
+                    <button
+                        type="button"
+                        className="comment__button"
+                        onClick={onClickDelete}
+                    >
                         {strings.DELETE}
                     </button>
                 </>
