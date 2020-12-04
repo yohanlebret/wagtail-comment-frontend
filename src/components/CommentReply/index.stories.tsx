@@ -2,7 +2,6 @@ import * as React from 'react';
 import { createStore } from 'redux';
 
 import { Store, reducer } from '../../state';
-import { authorFromApi } from '../../state/comments';
 
 import {
     RenderCommentsForStorybook,
@@ -39,10 +38,10 @@ export function replyFromSomeoneElse() {
     addTestReply(store, commentId, {
         mode: 'default',
         text: 'An example reply',
-        author: authorFromApi({
+        author: {
             id: 2,
             name: 'Someone else'
-        })
+        }
     });
 
     return <RenderCommentsForStorybook store={store} />;

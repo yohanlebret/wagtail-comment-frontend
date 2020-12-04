@@ -1,4 +1,4 @@
-import { Annotation } from './annotation';
+import type { Annotation } from './annotation';
 
 const GAP = 20.0; // Gap between comments in pixels
 const TOP_MARGIN = 100.0; // Spacing from the top to the first comment in pixels
@@ -44,28 +44,24 @@ export class LayoutController {
     updateDesiredPosition(commentId: number) {
         let annotation = this.commentAnnotations.get(commentId);
 
-        if (annotation.highlights.length === 0) {
-            return;
-        }
+        this.commentDesiredPositions.set(commentId, annotation.getDesiredPosition() + OFFSET);
+    }
 
-        // Get average position
-        const sumOfPositions = annotation.highlights
-            .map(highlight => {
-                return (
-                    highlight.getBoundingClientRect().top +
-                    document.documentElement.scrollTop
-                );
-            })
-            .reduce((sum, position) => {
-                return sum + position;
-            });
-
-        const averagePosition = sumOfPositions / annotation.highlights.length;
-
-        this.commentDesiredPositions.set(commentId, averagePosition + OFFSET);
+    refreshDesiredPositions() {
+        this.commentAnnotations.forEach((_, commentId) => this.updateDesiredPosition(commentId));
     }
 
     refresh() {
+        const oldDesiredPositions = new Map(this.commentDesiredPositions);
+        this.refreshDesiredPositions()
+        // It's not great to be recalculating all positions so regularly, but Wagtail's FE widgets aren't very constrained
+        // so could change layout in any number of ways. If we have a stable FE widget framework in the future, this could be used to trigger
+        // the position refresh more intelligently, or alternatively once comments is incorporated into the page form, a MutationObserver could
+        // potentially track most types of changes.
+        if (this.commentDesiredPositions !== oldDesiredPositions) {
+            this.isDirty = true;
+        } 
+
         if (!this.isDirty) {
             return;
         }

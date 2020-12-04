@@ -2,13 +2,12 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import * as dateFormat from 'dateformat';
 
-import { Store } from '../../state';
-import {
+import type { Store } from '../../state';
+import type {
     Author,
     Comment,
-    authorFromApi,
-    newCommentReply
 } from '../../state/comments';
+import { newCommentReply } from '../../state/comments';
 import {
     updateComment,
     deleteComment,
@@ -16,13 +15,13 @@ import {
     addReply,
     setPinnedComment
 } from '../../actions/comments';
-import APIClient from '../../api';
 import { LayoutController } from '../../utils/layout';
 import { getNextReplyId } from '../../utils/sequences';
 import CommentReplyComponent, { saveCommentReply } from '../CommentReply';
 import Checkbox from '../widgets/Checkbox';
+import type { TranslatableStrings } from '../../main';
 
-async function saveComment(comment: Comment, store: Store, api: APIClient) {
+async function saveComment(comment: Comment, store: Store) {
     store.dispatch(
         updateComment(comment.localId, {
             mode: 'saving'
@@ -30,14 +29,13 @@ async function saveComment(comment: Comment, store: Store, api: APIClient) {
     );
 
     try {
-        let commentData = await api.saveComment(comment);
 
         store.dispatch(
             updateComment(comment.localId, {
                 mode: 'default',
-                remoteId: commentData.id,
-                author: authorFromApi(commentData.author),
-                date: Date.parse(commentData.created_at)
+                remoteId: comment.remoteId,
+                author: comment.author,
+                date: comment.date
             })
         );
     } catch (err) {
@@ -50,7 +48,7 @@ async function saveComment(comment: Comment, store: Store, api: APIClient) {
     }
 }
 
-async function doDeleteComment(comment: Comment, store: Store, api: APIClient) {
+async function doDeleteComment(comment: Comment, store: Store) {
     store.dispatch(
         updateComment(comment.localId, {
             mode: 'deleting'
@@ -58,8 +56,6 @@ async function doDeleteComment(comment: Comment, store: Store, api: APIClient) {
     );
 
     try {
-        await api.deleteComment(comment);
-
         store.dispatch(deleteComment(comment.localId));
 
         if (comment.annotation) {
@@ -78,9 +74,9 @@ async function doDeleteComment(comment: Comment, store: Store, api: APIClient) {
 export interface CommentProps {
     store: Store;
     comment: Comment;
-    api: APIClient;
     layout: LayoutController;
     user: Author;
+    strings: TranslatableStrings;
 }
 
 export default class CommentComponent extends React.Component<CommentProps> {
@@ -98,7 +94,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
     }
 
     renderReplies({ hideNewReply = false } = {}): React.ReactFragment {
-        let { comment, store, api, user } = this.props;
+        let { comment, store, user, strings } = this.props;
 
         if (!comment.remoteId) {
             // Hide replies UI if the comment itself isn't saved yet
@@ -115,7 +111,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
             );
         };
 
-        let onClickSendReply = async (e: React.MouseEvent) => {
+        const sendReply = async (e: React.FormEvent) => {
             e.preventDefault();
 
             let replyId = getNextReplyId();
@@ -131,7 +127,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
                 })
             );
 
-            await saveCommentReply(comment, reply, store, api);
+            await saveCommentReply(comment, reply, store);
         };
 
         let onClickCancelReply = (e: React.MouseEvent) => {
@@ -155,10 +151,10 @@ export default class CommentComponent extends React.Component<CommentProps> {
                 <CommentReplyComponent
                     key={reply.localId}
                     store={store}
-                    api={api}
                     user={user}
                     comment={comment}
                     reply={reply}
+                    strings={strings}
                 />
             );
         }
@@ -173,16 +169,17 @@ export default class CommentComponent extends React.Component<CommentProps> {
             replyActions = (
                 <div className="comment__reply-actions">
                     <button
-                        onClick={onClickSendReply}
+                        type="submit"
                         className="comment__button comment__button--primary"
                     >
-                        Reply
+                        {strings.REPLY}
                     </button>
                     <button
+                        type="button"
                         onClick={onClickCancelReply}
                         className="comment__button"
                     >
-                        Cancel
+                        {strings.CANCEL}
                     </button>
                 </div>
             );
@@ -202,16 +199,16 @@ export default class CommentComponent extends React.Component<CommentProps> {
         }
 
         return (
-            <>
+            <form onSubmit={sendReply}>
                 <ul className="comment__replies">{replies}</ul>
                 {replyTextarea}
                 {replyActions}
-            </>
+            </form>
         );
     }
 
     renderCreating(): React.ReactFragment {
-        let { comment, store, api } = this.props;
+        let { comment, store, strings } = this.props;
 
         let onChangeText = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
             e.preventDefault();
@@ -223,9 +220,9 @@ export default class CommentComponent extends React.Component<CommentProps> {
             );
         };
 
-        let onSave = async (e: React.MouseEvent) => {
+        let onSave = async (e: React.FormEvent) => {
             e.preventDefault();
-            await saveComment(comment, store, api);
+            await saveComment(comment, store);
         };
 
         let onCancel = (e: React.MouseEvent) => {
@@ -240,30 +237,36 @@ export default class CommentComponent extends React.Component<CommentProps> {
 
         return (
             <>
-                <textarea
-                    className="comment__input"
-                    value={comment.text}
-                    onChange={onChangeText}
-                    style={{ resize: 'none' }}
-                    placeholder="Enter your comments..."
-                />
-                <div className="comment__actions">
-                    <button
-                        onClick={onSave}
-                        className="comment__button comment__button--primary"
-                    >
-                        Save
-                    </button>
-                    <button onClick={onCancel} className="comment__button">
-                        Cancel
-                    </button>
-                </div>
+                <form onSubmit={onSave}>
+                    <textarea
+                        className="comment__input"
+                        value={comment.text}
+                        onChange={onChangeText}
+                        style={{ resize: 'none' }}
+                        placeholder="Enter your comments..."
+                    />
+                    <div className="comment__actions">
+                        <button
+                            type="submit"
+                            className="comment__button comment__button--primary"
+                        >
+                            {strings.SAVE}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={onCancel} 
+                            className="comment__button"
+                        >
+                            {strings.CANCEL}
+                        </button>
+                    </div>
+                </form>
             </>
         );
     }
 
     renderEditing(): React.ReactFragment {
-        let { comment, store, api } = this.props;
+        let { comment, store, strings } = this.props;
 
         let onChangeText = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
             e.preventDefault();
@@ -275,10 +278,10 @@ export default class CommentComponent extends React.Component<CommentProps> {
             );
         };
 
-        let onSave = async (e: React.MouseEvent) => {
+        let onSave = async (e: React.FormEvent) => {
             e.preventDefault();
 
-            await saveComment(comment, store, api);
+            await saveComment(comment, store);
         };
 
         let onCancel = (e: React.MouseEvent) => {
@@ -294,56 +297,61 @@ export default class CommentComponent extends React.Component<CommentProps> {
 
         return (
             <>
-                <textarea
-                    className="comment__input"
-                    value={comment.text}
-                    onChange={onChangeText}
-                    style={{ resize: 'none' }}
-                />
-                <div className="comment__actions">
-                    <button
-                        onClick={onSave}
-                        className="comment__button comment__button--primary"
-                    >
-                        Save
-                    </button>
-                    <button onClick={onCancel} className="comment__button">
-                        Cancel
-                    </button>
-                    <div className="comment__resolved">
-                        <Checkbox
-                            id={`comment-${comment.localId}-resolved`}
-                            label="Resolved"
-                            checked={comment.resolvedAt !== null}
-                            disabled={true}
-                        />
+                <form onSubmit={onSave}>
+                    <textarea
+                        className="comment__input"
+                        value={comment.text}
+                        onChange={onChangeText}
+                        style={{ resize: 'none' }}
+                    />
+                    <div className="comment__actions">
+                        <button
+                            type="submit"
+                            className="comment__button comment__button--primary"
+                        >
+                            {strings.SAVE}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={onCancel}
+                            className="comment__button">
+                            {strings.CANCEL}
+                        </button>
+                        <div className="comment__resolved">
+                            <Checkbox
+                                id={`comment-${comment.localId}-resolved`}
+                                label="Resolved"
+                                checked={comment.resolvedAt !== null}
+                                disabled={true}
+                            />
+                        </div>
                     </div>
-                </div>
+                </form>
                 {this.renderReplies({ hideNewReply: true })}
             </>
         );
     }
 
     renderSaving(): React.ReactFragment {
-        let { comment } = this.props;
+        let { comment, strings } = this.props;
 
         return (
             <>
                 <p className="comment__text">{comment.text}</p>
                 {this.renderAuthorDate()}
-                <div className="comment__progress">Saving...</div>
+                <div className="comment__progress">{strings.SAVING}</div>
                 {this.renderReplies({ hideNewReply: true })}
             </>
         );
     }
 
     renderSaveError(): React.ReactFragment {
-        let { comment, store, api } = this.props;
+        let { comment, store, strings } = this.props;
 
         let onClickRetry = async (e: React.MouseEvent) => {
             e.preventDefault();
 
-            await saveComment(comment, store, api);
+            await saveComment(comment, store);
         };
 
         return (
@@ -352,9 +360,13 @@ export default class CommentComponent extends React.Component<CommentProps> {
                 {this.renderAuthorDate()}
                 {this.renderReplies({ hideNewReply: true })}
                 <div className="comment__error">
-                    Save error
-                    <button className="comment__button" onClick={onClickRetry}>
-                        Retry
+                    {strings.SAVE_ERROR}
+                    <button
+                        type="button"
+                        className="comment__button"
+                        onClick={onClickRetry}
+                    >
+                        {strings.RETRY}
                     </button>
                 </div>
             </>
@@ -362,12 +374,12 @@ export default class CommentComponent extends React.Component<CommentProps> {
     }
 
     renderDeleteConfirm(): React.ReactFragment {
-        let { comment, store, api } = this.props;
+        let { comment, store, strings } = this.props;
 
         let onClickDelete = async (e: React.MouseEvent) => {
             e.preventDefault();
 
-            await doDeleteComment(comment, store, api);
+            await doDeleteComment(comment, store);
         };
 
         let onClickCancel = (e: React.MouseEvent) => {
@@ -385,15 +397,20 @@ export default class CommentComponent extends React.Component<CommentProps> {
                 <p className="comment__text">{comment.text}</p>
                 {this.renderAuthorDate()}
                 <div className="comment__confirm-delete">
-                    Are you sure?
+                    {strings.CONFIRM_DELETE_COMMENT}
                     <button
+                        type="button"
                         className="comment__button comment__button--red"
                         onClick={onClickDelete}
                     >
-                        Delete
+                        {strings.DELETE}
                     </button>
-                    <button className="comment__button" onClick={onClickCancel}>
-                        Cancel
+                    <button
+                        type="button"
+                        className="comment__button"
+                        onClick={onClickCancel}
+                    >
+                        {strings.CANCEL}
                     </button>
                 </div>
                 {this.renderReplies({ hideNewReply: true })}
@@ -402,25 +419,25 @@ export default class CommentComponent extends React.Component<CommentProps> {
     }
 
     renderDeleting(): React.ReactFragment {
-        let { comment } = this.props;
+        let { comment, strings } = this.props;
 
         return (
             <>
                 <p className="comment__text">{comment.text}</p>
                 {this.renderAuthorDate()}
-                <div className="comment__progress">Deleting...</div>
+                <div className="comment__progress">{strings.DELETING}</div>
                 {this.renderReplies({ hideNewReply: true })}
             </>
         );
     }
 
     renderDeleteError(): React.ReactFragment {
-        let { comment, store, api } = this.props;
+        let { comment, store, strings } = this.props;
 
         let onClickRetry = async (e: React.MouseEvent) => {
             e.preventDefault();
 
-            await doDeleteComment(comment, store, api);
+            await doDeleteComment(comment, store);
         };
 
         let onClickCancel = async (e: React.MouseEvent) => {
@@ -439,12 +456,20 @@ export default class CommentComponent extends React.Component<CommentProps> {
                 {this.renderAuthorDate()}
                 {this.renderReplies({ hideNewReply: true })}
                 <div className="comment__error">
-                    Delete error
-                    <button className="comment__button" onClick={onClickCancel}>
-                        Cancel
+                    {strings.DELETE_ERROR}
+                    <button
+                        type="button"
+                        className="comment__button"
+                        onClick={onClickCancel}
+                    >
+                        {strings.CANCEL}
                     </button>
-                    <button className="comment__button" onClick={onClickRetry}>
-                        Retry
+                    <button
+                        type="button"
+                        className="comment__button"
+                        onClick={onClickRetry}
+                    >
+                        {strings.RETRY}
                     </button>
                 </div>
             </>
@@ -452,7 +477,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
     }
 
     renderDefault(): React.ReactFragment {
-        let { comment, store, api } = this.props;
+        let { comment, store, strings } = this.props;
 
         let onClickEdit = async (e: React.MouseEvent) => {
             e.preventDefault();
@@ -486,8 +511,6 @@ export default class CommentComponent extends React.Component<CommentProps> {
                 })
             );
 
-            await api.saveCommentResolvedStatus(comment, resolvedAt !== null);
-
             store.dispatch(
                 updateComment(comment.localId, {
                     updatingResolvedStatus: false
@@ -503,13 +526,18 @@ export default class CommentComponent extends React.Component<CommentProps> {
             actions = (
                 <>
                     <button
+                        type="button"
                         className="comment__button comment__button--primary"
                         onClick={onClickEdit}
                     >
-                        Edit
+                        {strings.EDIT}
                     </button>
-                    <button className="comment__button" onClick={onClickDelete}>
-                        Delete
+                    <button
+                        type="button"
+                        className="comment__button"
+                        onClick={onClickDelete}
+                    >
+                        {strings.DELETE}
                     </button>
                 </>
             );

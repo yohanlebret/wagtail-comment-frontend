@@ -1,21 +1,13 @@
-import { Annotation } from '../utils/annotation';
+import type { Annotation } from '../utils/annotation';
 import * as actions from '../actions/comments';
-import { ReviewerApi as AuthorApi } from '../api';
 
 type Partial<T> = {
     [P in keyof T]?: T[P];
 };
 
 export interface Author {
-    id: number;
+    id: any;
     name: string;
-}
-
-export function authorFromApi(data: AuthorApi): Author {
-    return {
-        id: data.id,
-        name: data.name
-    };
 }
 
 export type CommentReplyMode =
@@ -79,13 +71,14 @@ export type CommentMode =
     | 'delete_error';
 
 export interface Comment {
+    contentPath: string;
     localId: number;
     annotation: Annotation | null;
     remoteId: number | null;
     mode: CommentMode;
     resolvedAt: number | null;
     author: Author | null;
-    date: number;
+    date: number | null;
     text: string;
     replies: Map<number, CommentReply>;
     newReply: string;
@@ -104,6 +97,7 @@ export interface NewCommentOptions {
 }
 
 export function newComment(
+    contentPath: string,
     localId: number,
     annotation: Annotation | null,
     author: Author | null,
@@ -117,6 +111,7 @@ export function newComment(
     }: NewCommentOptions
 ): Comment {
     return {
+        contentPath,
         localId,
         annotation,
         remoteId,

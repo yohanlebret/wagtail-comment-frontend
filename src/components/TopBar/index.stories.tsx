@@ -6,6 +6,8 @@ import { Styling } from '../../utils/storybook';
 
 import TopBarComponent from './index';
 
+import { defaultStrings } from '../../main'
+
 export default { title: 'TopBar' };
 
 function RenderTopBarForStorybook({ store }: { store: Store }) {
@@ -17,7 +19,7 @@ function RenderTopBarForStorybook({ store }: { store: Store }) {
     return (
         <>
             <Styling />
-            <TopBarComponent store={store} {...state.settings} />
+            <TopBarComponent store={store} strings={defaultStrings} {...state.settings} />
         </>
     );
 }

@@ -3,18 +3,18 @@ import * as ReactDOM from 'react-dom';
 import { createStore } from 'redux';
 import root from 'react-shadow';
 
-import APIClient from './api';
-import { Annotation, AnnotatableSection } from './utils/annotation';
+import type { Annotation } from './utils/annotation';
 import { LayoutController } from './utils/layout';
 import { getNextCommentId, getNextReplyId } from './utils/sequences';
 import { Store, reducer } from './state';
-import {
+import type {
+    Author,
     Comment,
-    authorFromApi,
+} from './state/comments';
+import {
     newCommentReply,
     newComment
 } from './state/comments';
-import { ModerationState } from './state/moderation';
 import {
     addComment,
     addReply,
@@ -22,20 +22,77 @@ import {
     updateComment,
     setPinnedComment
 } from './actions/comments';
+import { selectCommentsForContentPathFactory } from './selectors';
 import CommentComponent from './components/Comment';
 import TopBarComponent from './components/TopBar';
-import ModerationBarComponent from './components/ModerationBar';
 
 import * as styles from '!css-to-string-loader!css-loader!sass-loader!./main.scss';
-import { updateGlobalSettings } from './actions/settings';
+
+export interface Widget {
+    contentPath: string;
+    setEnabled(enabled: boolean): void;
+    onChangeComments(comments: Comment[]): void;
+    getAnnotationForComment(comment: Comment): Annotation;
+    onRegister(makeComment: (annotation: Annotation, contentPath: string) => void): void
+}
+
+export interface TranslatableStrings {
+    SAVE: string;
+    SAVING: string;
+    CANCEL: string;
+    DELETE: string;
+    DELETING: string;
+    SHOW_RESOLVED_COMMENTS: string;
+    SHOW_COMMENTS: string;
+    EDIT: string;
+    REPLY: string;
+    RETRY: string;
+    DELETE_ERROR: string;
+    CONFIRM_DELETE_COMMENT: string;
+    SAVE_ERROR: string;
+}
+
+export const defaultStrings = {
+    SAVE: 'Save',
+    SAVING: 'Saving...',
+    CANCEL: 'Cancel',
+    DELETE: 'Delete',
+    DELETING: 'Deleting...',
+    SHOW_RESOLVED_COMMENTS: 'Show resolved comments',
+    SHOW_COMMENTS: 'Show comments',
+    EDIT: 'Edit',
+    REPLY: 'Reply',
+    RETRY: 'Retry',
+    DELETE_ERROR: 'Delete error',
+    CONFIRM_DELETE_COMMENT: 'Are you sure?',
+    SAVE_ERROR: 'Save error'
+}
+
+export interface InitialCommentReply {
+    id: number;
+    author: Author;
+    text: string;
+    created_at: string;
+    updated_at: string;
+}
+
+
+export interface InitialComment {
+    id: number;
+    author: Author;
+    text: string;
+    created_at: string;
+    updated_at: string;
+    resolved_at: string;
+    replies: InitialCommentReply[];
+    content_path: string;
+}
 
 function renderCommentsUi(
     store: Store,
-    api: APIClient,
     layout: LayoutController,
     comments: Comment[],
-    moderationEnabled: boolean,
-    moderationState: ModerationState
+    strings: TranslatableStrings
 ): React.ReactElement {
     let {
         commentsEnabled,
@@ -58,24 +115,12 @@ function renderCommentsUi(
         <CommentComponent
             key={comment.localId}
             store={store}
-            api={api}
             layout={layout}
             user={user}
             comment={comment}
+            strings={strings}
         />
     ));
-
-    let moderationBar = <></>;
-
-    if (moderationEnabled) {
-        moderationBar = (
-            <ModerationBarComponent
-                store={store}
-                api={api}
-                {...moderationState}
-            />
-        );
-    }
 
     return (
         <root.div>
@@ -84,38 +129,32 @@ function renderCommentsUi(
                 rel="stylesheet"
             />
             <style dangerouslySetInnerHTML={{ __html: styles }} />
-            <TopBarComponent store={store} />
+            <TopBarComponent store={store} strings={strings} />
             <ol className="comments-list">{commentsRendered}</ol>
-            {moderationBar}
         </root.div>
     );
 }
 
 export function initCommentsApp(
     element: HTMLElement,
-    api: APIClient,
-    addAnnotatableSections: (
-        addAnnotatableSection: (
-            contentPath: string,
-            element: HTMLElement
-        ) => void
-    ) => void,
-    moderationEnabled: boolean
+    author: Author,
+    initialComments: InitialComment[],
+    strings: TranslatableStrings | null
 ) {
-    let annotatableSections: { [contentPath: string]: AnnotatableSection } = {};
     let focusedComment: number | null = null;
     let pinnedComment: number | null = null;
 
-    let store: Store = createStore(reducer);
+    let store: Store = createStore(reducer, {settings: {
+        user: author,
+        commentsEnabled: true,
+        showResolvedComments: false
+    }});
     let layout = new LayoutController();
 
-    api.fetchBase().then(data => {
-        store.dispatch(
-            updateGlobalSettings({
-                user: authorFromApi(data.you)
-            })
-        );
-    });
+    if (!strings) {
+        strings = defaultStrings;
+    }
+
 
     // Check if there is "comment" query parameter.
     // If this is set, the user has clicked on a "View on frontend" link of an
@@ -167,7 +206,7 @@ export function initCommentsApp(
         // Check if the pinned comment has changed
         if (state.comments.pinnedComment != pinnedComment) {
             // Tell layout controller about the pinned comment
-            // so it is moved alongside it's annotation
+            // so it is moved alongside its annotation
             layout.setPinnedComment(state.comments.pinnedComment);
 
             pinnedComment = state.comments.pinnedComment;
@@ -176,27 +215,22 @@ export function initCommentsApp(
         ReactDOM.render(
             renderCommentsUi(
                 store,
-                api,
                 layout,
                 commentList,
-                moderationEnabled,
-                state.moderation
+                strings
             ),
             element,
             () => {
                 // Render again if layout has changed (eg, a comment was added, deleted or resized)
                 // This will just update the "top" style attributes in the comments to get them to move
+                layout.refresh()
                 if (layout.isDirty) {
-                    layout.refresh();
-
                     ReactDOM.render(
                         renderCommentsUi(
                             store,
-                            api,
                             layout,
                             commentList,
-                            moderationEnabled,
-                            state.moderation
+                            strings
                         ),
                         element
                     );
@@ -209,8 +243,66 @@ export function initCommentsApp(
 
     store.subscribe(render);
 
-    let makeNewComment = (annotation: Annotation) => {
+    // Fetch existing comments
+    for (let comment of initialComments) {
+
         let commentId = getNextCommentId();
+
+        // Create comment
+        store.dispatch(
+            addComment(
+                newComment(
+                    comment.content_path,
+                    commentId,
+                    null,
+                    comment.author,
+                    Date.parse(comment.created_at),
+                    {
+                        remoteId: comment.id,
+                        resolvedAt: comment.resolved_at
+                            ? Date.parse(comment.resolved_at)
+                            : null,
+                        text: comment.text
+                    }
+                )
+            )
+        );
+
+        // Create replies
+        for (let reply of comment.replies) {
+            store.dispatch(
+                addReply(
+                    commentId,
+                    newCommentReply(
+                        getNextReplyId(),
+                        reply.author,
+                        Date.parse(reply.created_at),
+                        { remoteId: reply.id, text: reply.text }
+                    )
+                )
+            );
+        }
+
+        // If this is the initial focused comment. Focus and pin it
+        // TODO: Scroll to this comment
+        if (
+            initialFocusedCommentId &&
+            comment.id == initialFocusedCommentId
+        ) {
+            store.dispatch(setFocusedComment(commentId));
+            store.dispatch(setPinnedComment(commentId));
+
+            // HACK: If the comment is resolved. Set that comments "resolvedInThisSession" field so it displays
+            if (comment.resolved_at !== null) {
+                store.dispatch(
+                    updateComment(commentId, { resolvedThisSession: true })
+                );
+            }
+        }
+    }
+
+    let attachAnnotationLayout = (annotation: Annotation, commentId: number) => {
+        // Attach an annotation to an existing comment in the layout
 
         // Focus and pin comment when annotation is clicked
         annotation.setOnClickHandler(() => {
@@ -220,125 +312,71 @@ export function initCommentsApp(
 
         // Let layout engine know the annotation so it would position the comment correctly
         layout.setCommentAnnotation(commentId, annotation);
+    };
+
+    let makeComment = (annotation: Annotation, contentPath: string) => {
+        let commentId = getNextCommentId();
+
+        attachAnnotationLayout(annotation, commentId);
 
         // Create the comment
         store.dispatch(
             addComment(
-                newComment(commentId, annotation, null, Date.now(), {
+                newComment(contentPath, commentId, annotation, store.getState().settings.user, Date.now(), {
                     mode: 'creating'
                 })
             )
         );
+    
 
         // Focus and pin the comment
         store.dispatch(setFocusedComment(commentId));
         store.dispatch(setPinnedComment(commentId));
     };
 
-    let selectionEnabled = () => {
-        return store.getState().settings.commentsEnabled;
-    };
-
-    addAnnotatableSections((contentPath, element) => {
-        annotatableSections[contentPath] = new AnnotatableSection(
-            contentPath,
-            element,
-            makeNewComment,
-            selectionEnabled
-        );
-    });
-
-    // Fetch existing comments
-    api.fetchAllComments().then(comments => {
-        for (let comment of comments) {
-            let section = annotatableSections[comment.content_path];
-            if (!section) {
-                continue;
+    let registerWidget = (widget: Widget) => {
+        let state = store.getState()
+        let currentlyEnabled = state.settings.commentsEnabled;
+        widget.setEnabled(currentlyEnabled);
+        let unsubscribeWidgetEnable = store.subscribe(() => {
+            let previouslyEnabled = currentlyEnabled;
+            currentlyEnabled = store.getState().settings.commentsEnabled;
+            if (previouslyEnabled !== currentlyEnabled) {
+                widget.setEnabled(currentlyEnabled);
             }
-
-            // Create annotation
-            let annotation = section.addAnnotation({
-                quote: comment.quote,
-                ranges: [
-                    {
-                        start: comment.start_xpath,
-                        startOffset: comment.start_offset,
-                        end: comment.end_xpath,
-                        endOffset: comment.end_offset
-                    }
-                ]
-            });
-
-            let commentId = getNextCommentId();
-
-            // Focus and pin comment when annotation is clicked
-            annotation.setOnClickHandler(() => {
-                store.dispatch(setFocusedComment(commentId));
-                store.dispatch(setPinnedComment(commentId));
-            });
-
-            // Let layout engine know the annotation so it would position the comment correctly
-            layout.setCommentAnnotation(commentId, annotation);
-
-            // Create comment
-            store.dispatch(
-                addComment(
-                    newComment(
-                        commentId,
-                        annotation,
-                        authorFromApi(comment.author),
-                        Date.parse(comment.created_at),
-                        {
-                            remoteId: comment.id,
-                            resolvedAt: comment.resolved_at
-                                ? Date.parse(comment.resolved_at)
-                                : null,
-                            text: comment.text
-                        }
-                    )
-                )
-            );
-
-            // Create replies
-            for (let reply of comment.replies) {
+        })
+        const selectCommentsForContentPath = selectCommentsForContentPathFactory(widget.contentPath)
+        let currentComments = selectCommentsForContentPath(state);
+        let unsubscribeWidgetComments = store.subscribe(() => {
+            let previousComments = currentComments;
+            currentComments = selectCommentsForContentPath(store.getState());
+            if (previousComments !== currentComments) {
+                widget.onChangeComments(currentComments);
+            }
+        })
+        state.comments.comments.forEach((comment) => {
+            if (comment.contentPath == widget.contentPath) {
+                const annotation = widget.getAnnotationForComment(comment);
+                attachAnnotationLayout(annotation, comment.localId);
                 store.dispatch(
-                    addReply(
-                        commentId,
-                        newCommentReply(
-                            getNextReplyId(),
-                            authorFromApi(reply.author),
-                            Date.parse(reply.created_at),
-                            { remoteId: reply.id, text: reply.text }
-                        )
+                    updateComment(
+                        comment.localId, {annotation: annotation}
                     )
                 );
             }
+        })
 
-            // If this is the initial focused comment. Focus and pin it
-            // TODO: Scroll to this comment
-            if (
-                initialFocusedCommentId &&
-                comment.id == initialFocusedCommentId
-            ) {
-                store.dispatch(setFocusedComment(commentId));
-                store.dispatch(setPinnedComment(commentId));
+        widget.onRegister(makeComment);
 
-                // HACK: If the comment is resolved. Set that comments "resolvedInThisSession" field so it displays
-                if (comment.resolved_at !== null) {
-                    store.dispatch(
-                        updateComment(commentId, { resolvedThisSession: true })
-                    );
-                }
-            }
-        }
-    });
+        return {unsubscribeWidgetEnable, unsubscribeWidgetComments}
+    }
 
     // Unfocus when document body is clicked
     document.body.addEventListener('click', e => {
         if (e.target instanceof HTMLElement) {
-            // ignore if click target is a comment or a highlight
+            // ignore if click target is a comment or an annotation
             if (
-                !e.target.closest('#comments, .annotator-hl, .annotator-adder')
+                !e.target.closest('#comments, [data-annotation]')
             ) {
                 // Running store.dispatch directly here seems to prevent the event from being handled anywhere else
                 setTimeout(() => {
@@ -348,6 +386,7 @@ export function initCommentsApp(
             }
         }
     });
+
+    return {makeComment, registerWidget}
 }
 
-export { default as APIClient } from './api';
