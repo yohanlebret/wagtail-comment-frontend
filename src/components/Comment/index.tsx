@@ -188,7 +188,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
         }
 
         let replyTextarea = <></>;
-        if (!hideNewReply && isFocused || comment.newReply)) {
+        if (!hideNewReply && (isFocused || comment.newReply)) {
             replyTextarea = (
                 <textarea
                     className="comment__reply-input"
