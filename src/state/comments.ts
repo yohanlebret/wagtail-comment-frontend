@@ -85,7 +85,6 @@ export interface Comment {
     replies: Map<number, CommentReply>;
     newReply: string;
     editPreviousText: string;
-    isFocused: boolean;
     remoteReplyCount: number;
 }
 
@@ -121,7 +120,6 @@ export function newComment(
         replies,
         newReply: '',
         editPreviousText: '',
-        isFocused: false,
         deleted: false,
         remoteReplyCount: Array.from(replies.values()).reduce((n, reply) => reply.remoteId !== null ? n + 1 : n, 0)
     };
@@ -212,31 +210,7 @@ export function reducer(
 
         case actions.SET_FOCUSED_COMMENT:
             state = cloneComments(state);
-
-            // Unset isFocused on previous focused comment
-            if (state.focusedComment) {
-                // Unset isFocused on previous focused comment
-                state.comments.set(
-                    state.focusedComment,
-                    update(state.comments.get(state.focusedComment), {
-                        isFocused: false
-                    })
-                );
-
-                state.focusedComment = null;
-            }
-
-            // Set isFocused on focused comment
-            if (action.commentId && state.comments.has(action.commentId)) {
-                state.comments.set(
-                    action.commentId,
-                    update(state.comments.get(action.commentId), {
-                        isFocused: true
-                    })
-                );
-
-                state.focusedComment = action.commentId;
-            }
+            state.focusedComment = action.commentId;
             break;
 
         case actions.SET_PINNED_COMMENT:

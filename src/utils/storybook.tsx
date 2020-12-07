@@ -66,6 +66,7 @@ export function RenderCommentsForStorybook({
             layout={layout}
             user={author}
             comment={comment}
+            isFocused={comment.localId === state.comments.focusedComment}
             strings={defaultStrings}
         />
     ));

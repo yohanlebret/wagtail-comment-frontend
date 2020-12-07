@@ -73,6 +73,7 @@ async function doDeleteComment(comment: Comment, store: Store) {
 export interface CommentProps {
     store: Store;
     comment: Comment;
+    isFocused: boolean;
     layout: LayoutController;
     user: Author;
     strings: TranslatableStrings;
@@ -93,7 +94,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
     }
 
     renderReplies({ hideNewReply = false } = {}): React.ReactFragment {
-        let { comment, store, user, strings } = this.props;
+        let { comment, isFocused, store, user, strings } = this.props;
 
         if (!comment.remoteId) {
             // Hide replies UI if the comment itself isn't saved yet
@@ -166,7 +167,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
         }
 
         let replyActions = <></>;
-        if (!hideNewReply && comment.isFocused && comment.newReply.length > 0) {
+        if (!hideNewReply && isFocused && comment.newReply.length > 0) {
             replyActions = (
                 <div className="comment__reply-actions">
                     <button
@@ -187,7 +188,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
         }
 
         let replyTextarea = <></>;
-        if (!hideNewReply && (comment.isFocused || comment.newReply)) {
+        if (!hideNewReply && isFocused || comment.newReply)) {
             replyTextarea = (
                 <textarea
                     className="comment__reply-input"
@@ -599,7 +600,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
         let top = this.props.layout.getCommentPosition(
             this.props.comment.localId
         );
-        let right = this.props.comment.isFocused ? 50 : 0;
+        let right = this.props.isFocused ? 50 : 0;
         return (
             <li
                 key={this.props.comment.localId}

@@ -93,10 +93,12 @@ function renderCommentsUi(
     comments: Comment[],
     strings: TranslatableStrings
 ): React.ReactElement {
+    const state = store.getState();
     let {
         commentsEnabled,
         user
-    } = store.getState().settings;
+    } = state.settings;
+    const focusedComment = state.comments.focusedComment;
     let commentsToRender = comments;
 
     if (!commentsEnabled || !user) {
@@ -111,6 +113,7 @@ function renderCommentsUi(
             layout={layout}
             user={user}
             comment={comment}
+            isFocused={comment.localId === focusedComment}
             strings={strings}
         />
     ));

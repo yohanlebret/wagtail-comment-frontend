@@ -13,7 +13,7 @@ export interface SettingsState {
 
 export type SettingsStateUpdate = Partial<SettingsState>;
 
-function initialState(): SettingsState {
+export function initialState(): SettingsState {
     return {
         user: null,
         commentsEnabled: true,
