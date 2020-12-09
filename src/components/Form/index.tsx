@@ -10,22 +10,23 @@ export interface CommentFormSetProps {
     comments: Comment[];
 }
 
-export function CommentFormSetComponent(props: CommentFormSetProps) {
-    const [initialNumber] = React.useState(props.comments.filter(comment => {return comment.remoteId != null}).length);
+export function CommentFormSetComponent({comments}: CommentFormSetProps) {
+    const [initialNumber] = React.useState(comments.filter(comment => {return comment.remoteId != null}).length);
     const prefix = "comments";
 
-    const commentForms = props.comments.map((comment, formNumber) => (
+    const commentForms = comments.map((comment, formNumber) => (
         <CommentFormComponent
             key={comment.localId}
             comment={comment}
             formNumber={formNumber}
+            prefix={prefix}
         />
     ));
 
     return (<>
         <PrefixedHiddenInput
             fieldName="TOTAL_FORMS"
-            value={props.comments.length}
+            value={comments.length}
             prefix={prefix}
         />
         <PrefixedHiddenInput
@@ -53,12 +54,12 @@ interface PrefixedHiddenInputProps {
     fieldName: string;
 }
 
-function PrefixedHiddenInput(props: PrefixedHiddenInputProps) {
+function PrefixedHiddenInput({prefix, value, fieldName}: PrefixedHiddenInputProps) {
     return (<input
         type="hidden"
-        name={`${props.prefix}-${props.fieldName}`}
-        value={props.value} 
-        id={`id_${props.prefix}-${props.fieldName}`}
+        name={`${prefix}-${fieldName}`}
+        value={value} 
+        id={`id_${prefix}-${fieldName}`}
     />)
 }
 
@@ -68,24 +69,23 @@ export interface CommentReplyFormComponentProps {
     formNumber: number;
 }
 
-export function CommentReplyFormComponent(props: CommentReplyFormComponentProps) {
-    const reply = props.reply
-    const prefix = `${props.prefix}-${props.formNumber}`
+export function CommentReplyFormComponent({reply, formNumber, prefix}: CommentReplyFormComponentProps) {
+    const fullPrefix = `${prefix}-${formNumber}`
     return (<fieldset>
         <PrefixedHiddenInput
             fieldName="DELETE"
             value={reply.deleted ? 1 : ""}
-            prefix={prefix}
+            prefix={fullPrefix}
         />
         <PrefixedHiddenInput
             fieldName="id"
             value={reply.remoteId}
-            prefix={prefix}
+            prefix={fullPrefix}
         />
         <PrefixedHiddenInput
             fieldName="text"
             value={reply.text}
-            prefix={prefix}
+            prefix={fullPrefix}
         />
     </fieldset>)
 }
@@ -95,39 +95,39 @@ export interface CommentReplyFormSetProps {
     prefix: string;
 }
 
-export function CommentReplyFormSetComponent(props: CommentReplyFormSetProps) {
-    const [initialNumber] = React.useState(props.replies.filter(comment => {return comment.remoteId != null}).length);
-    const prefix = `${props.prefix}-replies`
+export function CommentReplyFormSetComponent({replies, prefix}: CommentReplyFormSetProps) {
+    const [initialNumber] = React.useState(replies.filter(comment => {return comment.remoteId != null}).length);
+    const fullPrefix = `${prefix}-replies`
 
-    const commentForms = props.replies.map((reply, formNumber) => (
+    const commentForms = replies.map((reply, formNumber) => (
         <CommentReplyFormComponent
             key={reply.localId}
             formNumber={formNumber}
             reply={reply}
-            prefix={prefix}
+            prefix={fullPrefix}
         />
     ));
 
     return (<>
         <PrefixedHiddenInput
             fieldName="TOTAL_FORMS"
-            value={props.replies.length}
-            prefix={prefix}
+            value={replies.length}
+            prefix={fullPrefix}
         />
         <PrefixedHiddenInput
             fieldName="INITIAL_FORMS"
             value={initialNumber}
-            prefix={prefix}
+            prefix={fullPrefix}
         />
         <PrefixedHiddenInput
             fieldName="MIN_NUM_FORMS"
             value="0"
-            prefix={prefix}
+            prefix={fullPrefix}
         />
         <PrefixedHiddenInput
             fieldName="MAX_NUM_FORMS"
             value=""
-            prefix={prefix}
+            prefix={fullPrefix}
         />
         {commentForms}
     </>)
@@ -136,36 +136,36 @@ export function CommentReplyFormSetComponent(props: CommentReplyFormSetProps) {
 export interface CommentFormProps {
     comment: Comment;
     formNumber: number;
+    prefix: string;
 }
 
-export function CommentFormComponent(props: CommentFormProps) {
-    const comment = props.comment
-    const prefix = `comments-${props.formNumber}`
+export function CommentFormComponent({comment, formNumber, prefix}: CommentFormProps) {
+    const fullPrefix = `${prefix}-${formNumber}`
 
     return (<fieldset>
         <PrefixedHiddenInput
             fieldName="DELETE"
             value={comment.deleted ? 1 : ""}
-            prefix={prefix}
+            prefix={fullPrefix}
         />
         <PrefixedHiddenInput
             fieldName="id"
             value={comment.remoteId}
-            prefix={prefix}
+            prefix={fullPrefix}
         />
         <PrefixedHiddenInput
             fieldName="contentpath"
             value={comment.contentpath}
-            prefix={prefix}
+            prefix={fullPrefix}
         />
         <PrefixedHiddenInput
             fieldName="text"
             value={comment.text}
-            prefix={prefix}
+            prefix={fullPrefix}
         />
         <CommentReplyFormSetComponent
             replies={Array.from(comment.replies.values())}
-            prefix={prefix}
+            prefix={fullPrefix}
         />
     </fieldset>)
 }
