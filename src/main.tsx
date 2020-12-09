@@ -26,7 +26,7 @@ import CommentComponent from './components/Comment';
 import { CommentFormSetComponent } from './components/Form'
 import TopBarComponent from './components/TopBar';
 
-import * as styles from '!css-to-string-loader!css-loader!sass-loader!./main.scss';
+import styles from '!css-to-string-loader!css-loader!sass-loader!./main.scss';
 
 export interface Widget {
     contentpath: string;
