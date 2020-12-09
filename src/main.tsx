@@ -164,14 +164,12 @@ export function initCommentsApp(
     }
 
     let render = () => {
-        let state = store.getState();
-        let commentList: Comment[] = Array.from(
+        const state = store.getState();
+        const commentList: Comment[] = Array.from(
             state.comments.comments.values()
         );
 
-
-
-        ReactDOM.render(<CommentFormSetComponent comments={commentList} />, outputElement);
+        ReactDOM.render(<CommentFormSetComponent comments={commentList} remoteCommentCount={state.comments.remoteCommentCount} />, outputElement);
 
         // Check if the focused comment has changed
         if (state.comments.focusedComment != focusedComment) {

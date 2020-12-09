@@ -8,10 +8,10 @@ import type {
 
 export interface CommentFormSetProps {
     comments: Comment[];
+    remoteCommentCount: number;
 }
 
-export function CommentFormSetComponent({comments}: CommentFormSetProps) {
-    const [initialNumber] = React.useState(comments.filter(comment => {return comment.remoteId != null}).length);
+export function CommentFormSetComponent({comments, remoteCommentCount}: CommentFormSetProps) {
     const prefix = "comments";
 
     const commentForms = comments.map((comment, formNumber) => (
@@ -31,7 +31,7 @@ export function CommentFormSetComponent({comments}: CommentFormSetProps) {
         />
         <PrefixedHiddenInput
             fieldName="INITIAL_FORMS"
-            value={initialNumber}
+            value={remoteCommentCount}
             prefix={prefix}
         />
         <PrefixedHiddenInput
@@ -93,10 +93,10 @@ export function CommentReplyFormComponent({reply, formNumber, prefix}: CommentRe
 export interface CommentReplyFormSetProps {
     replies: CommentReply[];
     prefix: string;
+    remoteReplyCount: number;
 }
 
-export function CommentReplyFormSetComponent({replies, prefix}: CommentReplyFormSetProps) {
-    const [initialNumber] = React.useState(replies.filter(comment => {return comment.remoteId != null}).length);
+export function CommentReplyFormSetComponent({replies, prefix, remoteReplyCount}: CommentReplyFormSetProps) {
     const fullPrefix = `${prefix}-replies`
 
     const commentForms = replies.map((reply, formNumber) => (
@@ -116,7 +116,7 @@ export function CommentReplyFormSetComponent({replies, prefix}: CommentReplyForm
         />
         <PrefixedHiddenInput
             fieldName="INITIAL_FORMS"
-            value={initialNumber}
+            value={remoteReplyCount}
             prefix={fullPrefix}
         />
         <PrefixedHiddenInput
@@ -166,6 +166,7 @@ export function CommentFormComponent({comment, formNumber, prefix}: CommentFormP
         <CommentReplyFormSetComponent
             replies={Array.from(comment.replies.values())}
             prefix={fullPrefix}
+            remoteReplyCount={comment.remoteReplyCount}
         />
     </fieldset>)
 }

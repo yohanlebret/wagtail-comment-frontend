@@ -86,6 +86,7 @@ export interface Comment {
     newReply: string;
     editPreviousText: string;
     isFocused: boolean;
+    remoteReplyCount: number;
 }
 
 export interface NewCommentOptions {
@@ -122,6 +123,7 @@ export function newComment(
         editPreviousText: '',
         isFocused: false,
         deleted: false,
+        remoteReplyCount: Array.from(replies.values()).reduce((n, reply) => reply.remoteId !== null ? n + 1 : n, 0)
     };
 }
 
@@ -131,13 +133,15 @@ export interface CommentsState {
     comments: Map<number, Comment>;
     focusedComment: number | null;
     pinnedComment: number | null;
+    remoteCommentCount: number; // This is redundant, but stored for efficiency as it will change only as the app adds its loaded comments
 }
 
 function initialState(): CommentsState {
     return {
         comments: new Map(),
         focusedComment: null,
-        pinnedComment: null
+        pinnedComment: null,
+        remoteCommentCount: 0
     };
 }
 
@@ -167,6 +171,9 @@ export function reducer(
         case actions.ADD_COMMENT:
             state = cloneComments(state);
             state.comments.set(action.comment.localId, action.comment);
+            if (action.comment.remoteId) {
+                state.remoteCommentCount += 1;
+            }
             break;
 
         case actions.UPDATE_COMMENT:
@@ -243,9 +250,13 @@ export function reducer(
                 break;
             }
             state = cloneComments(state);
+            const comment = cloneReplies(state.comments.get(action.commentId))
+            if (action.reply.remoteId) {
+                comment.remoteReplyCount += 1;
+            }
             state.comments.set(
                 action.commentId,
-                cloneReplies(state.comments.get(action.commentId))
+                comment
             );
             state.comments
                 .get(action.commentId)
