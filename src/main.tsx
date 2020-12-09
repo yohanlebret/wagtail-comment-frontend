@@ -103,11 +103,7 @@ function renderCommentsUi(
         commentsToRender = [];
     }
     // Hide all resolved/deleted comments
-    commentsToRender = commentsToRender.filter(comment => {
-        return (
-            comment.deleted == false
-        );
-    });
+    commentsToRender = commentsToRender.filter(({ deleted }) => !deleted);
     let commentsRendered = commentsToRender.map(comment => (
         <CommentComponent
             key={comment.localId}
