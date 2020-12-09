@@ -200,11 +200,13 @@ export default class CommentComponent extends React.Component<CommentProps> {
         }
 
         return (
-            <form onSubmit={sendReply}>
+            <>
                 <ul className="comment__replies">{replies}</ul>
-                {replyTextarea}
-                {replyActions}
-            </form>
+                <form onSubmit={sendReply}>
+                    {replyTextarea}
+                    {replyActions}
+                </form>
+            </>
         );
     }
 
