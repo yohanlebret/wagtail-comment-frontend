@@ -1,5 +1,5 @@
-import * as React from 'react';
-import * as dateFormat from 'dateformat';
+import React from 'react';
+import dateFormat from 'dateformat';
 
 import type { Store } from '../../state';
 import type {

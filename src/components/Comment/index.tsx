@@ -1,6 +1,6 @@
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import * as dateFormat from 'dateformat';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import dateFormat from 'dateformat';
 
 import type { Store } from '../../state';
 import type {
