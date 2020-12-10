@@ -1,4 +1,4 @@
-import { basicCommentsState } from '../state/comments.test'
+import { basicCommentsState } from '../__fixtures__/state'
 import { initialState } from '../state/settings'
 
 import { selectCommentsForContentPathFactory } from './index'
