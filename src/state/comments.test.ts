@@ -1,11 +1,11 @@
 import { basicCommentsState } from '../__fixtures__/state';
-import type {
+import {
   Comment,
   CommentMode,
   CommentReply,
   CommentReplyMode,
+  reducer,
 } from './comments';
-import { reducer } from './comments';
 import { createStore } from 'redux';
 
 import * as actions from '../actions/comments';

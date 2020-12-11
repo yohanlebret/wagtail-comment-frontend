@@ -27,19 +27,18 @@ const Checkbox = (props: CheckboxProps) => {
         <label htmlFor={props.id}>{props.label}</label>
       </div>
     );
-  } else {
-    return (
-      <div className="checkbox">
-        <input
-          id={props.id}
-          type="checkbox"
-          onChange={onChange}
-          checked={props.checked}
-        />
-        <label htmlFor={props.id}>{props.label}</label>
-      </div>
-    );
   }
+  return (
+    <div className="checkbox">
+      <input
+        id={props.id}
+        type="checkbox"
+        onChange={onChange}
+        checked={props.checked}
+      />
+      <label htmlFor={props.id}>{props.label}</label>
+    </div>
+  );
 };
 
 export default Checkbox;

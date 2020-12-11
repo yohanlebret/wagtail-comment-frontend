@@ -7,8 +7,7 @@ import type { Annotation } from './utils/annotation';
 import { LayoutController } from './utils/layout';
 import { getNextCommentId, getNextReplyId } from './utils/sequences';
 import { Store, reducer } from './state';
-import type { Comment } from './state/comments';
-import { newCommentReply, newComment } from './state/comments';
+import { Comment, newCommentReply, newComment } from './state/comments';
 import {
   addComment,
   addReply,
@@ -65,6 +64,8 @@ export const defaultStrings = {
   SAVE_ERROR: 'Save error',
 };
 
+/* eslint-disable camelcase */
+// This is done as this is serialized pretty directly from the Django model
 export interface InitialCommentReply {
   pk: number;
   user: any;
@@ -82,6 +83,7 @@ export interface InitialComment {
   replies: InitialCommentReply[];
   contentpath: string;
 }
+/* eslint-enable */
 
 function renderCommentsUi(
   store: Store,
@@ -91,7 +93,7 @@ function renderCommentsUi(
 ): React.ReactElement {
   const state = store.getState();
   const { commentsEnabled, user } = state.settings;
-  let focusedComment = state.comments.focusedComment;
+  const focusedComment = state.comments.focusedComment;
   let commentsToRender = comments;
 
   if (!commentsEnabled || !user) {
@@ -110,7 +112,8 @@ function renderCommentsUi(
       strings={strings}
     />
   ));
-
+  /* eslint-disable react/no-danger */
+  // The dangerouslySetInnerHTML will no longer be necessary when the styling is moved into Wagtail's CSS
   return (
     <root.div>
       <link
@@ -122,6 +125,7 @@ function renderCommentsUi(
       <ol className="comments-list">{commentsRendered}</ol>
     </root.div>
   );
+  /* eslint-enable react/no-danger */
 }
 
 export function initCommentsApp(
@@ -155,7 +159,7 @@ export function initCommentsApp(
   const urlParams = new URLSearchParams(window.location.search);
   let initialFocusedCommentId: number | null = null;
   if (urlParams.has('comment')) {
-    initialFocusedCommentId = parseInt(urlParams.get('comment'));
+    initialFocusedCommentId = parseInt(urlParams.get('comment'), 10);
   }
 
   const render = () => {
@@ -270,7 +274,10 @@ export function initCommentsApp(
     }
   }
 
-  const attachAnnotationLayout = (annotation: Annotation, commentId: number) => {
+  const attachAnnotationLayout = (
+    annotation: Annotation,
+    commentId: number
+  ) => {
     // Attach an annotation to an existing comment in the layout
 
     // Focus and pin comment when annotation is clicked

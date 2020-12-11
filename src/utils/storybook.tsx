@@ -22,6 +22,8 @@ import { defaultStrings } from '../main';
 import styles from '!css-to-string-loader!css-loader!sass-loader!./../main.scss';
 import CommentComponent from '../components/Comment/index';
 
+/* eslint-disable react/no-danger */
+// TODO: replace this when commenting is moved into Wagtail proper
 export function Styling() {
   return (
     <>
@@ -33,6 +35,7 @@ export function Styling() {
     </>
   );
 }
+/* eslint-enable react/no-danger */
 
 export function RenderCommentsForStorybook({
   store,
@@ -48,13 +51,6 @@ export function RenderCommentsForStorybook({
 
   const layout = new LayoutController();
 
-  if (!author) {
-    author = {
-      id: 1,
-      name: 'Admin',
-    };
-  }
-
   const commentsToRender: Comment[] = Array.from(
     state.comments.comments.values()
   );
@@ -64,7 +60,12 @@ export function RenderCommentsForStorybook({
       key={comment.localId}
       store={store}
       layout={layout}
-      user={author}
+      user={
+        author || {
+          id: 1,
+          name: 'Admin',
+        }
+      }
       comment={comment}
       isFocused={comment.localId === state.comments.focusedComment}
       strings={defaultStrings}
@@ -90,6 +91,8 @@ export function addTestComment(
 ): number {
   const commentId = getNextCommentId();
 
+  const addCommentOptions = options;
+
   const author = options.author || {
     id: 1,
     name: 'Admin',
@@ -97,16 +100,18 @@ export function addTestComment(
 
   // We must have a remoteId unless the comment is being created
   if (options.mode !== 'creating' && options.remoteId === undefined) {
-    options.remoteId = commentId;
+    addCommentOptions.remoteId = commentId;
   }
 
   // Comment must be focused if the mode is anything other than default
   if (options.mode !== 'default' && options.focused === undefined) {
-    options.focused = true;
+    addCommentOptions.focused = true;
   }
 
   store.dispatch(
-    addComment(newComment('test', commentId, null, author, Date.now(), options))
+    addComment(
+      newComment('test', commentId, null, author, Date.now(), addCommentOptions)
+    )
   );
 
   if (options.focused) {
@@ -127,16 +132,17 @@ export function addTestReply(
   commentId: number,
   options: AddTestReplyOptions
 ) {
+  const addReplyOptions = options;
   const author = options.author || {
     id: 1,
     name: 'Admin',
   };
 
   if (!options.remoteId) {
-    options.remoteId = 1;
+    addReplyOptions.remoteId = 1;
   }
 
   store.dispatch(
-    addReply(commentId, newCommentReply(1, author, Date.now(), options))
+    addReply(commentId, newCommentReply(1, author, Date.now(), addReplyOptions))
   );
 }

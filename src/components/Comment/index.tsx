@@ -3,8 +3,7 @@ import ReactDOM from 'react-dom';
 import dateFormat from 'dateformat';
 
 import type { Store } from '../../state';
-import type { Author, Comment } from '../../state/comments';
-import { newCommentReply } from '../../state/comments';
+import { Author, Comment, newCommentReply } from '../../state/comments';
 import {
   updateComment,
   deleteComment,
@@ -157,13 +156,11 @@ export default class CommentComponent extends React.Component<CommentProps> {
       }
     }
 
-    // Hide new reply if a reply is being edited
-    if (!hideNewReply && replyBeingEdited) {
-      hideNewReply = true;
-    }
+    // Hide new reply if a reply is being edited as well
+    const newReplyHidden = hideNewReply || replyBeingEdited;
 
     let replyActions = <></>;
-    if (!hideNewReply && isFocused && comment.newReply.length > 0) {
+    if (!newReplyHidden && isFocused && comment.newReply.length > 0) {
       replyActions = (
         <div className="comment__reply-actions">
           <button
@@ -184,7 +181,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
     }
 
     let replyTextarea = <></>;
-    if (!hideNewReply && (isFocused || comment.newReply)) {
+    if (!newReplyHidden && (isFocused || comment.newReply)) {
       replyTextarea = (
         <textarea
           className="comment__reply-input"
@@ -587,7 +584,9 @@ export default class CommentComponent extends React.Component<CommentProps> {
       this.props.store.dispatch(setPinnedComment(this.props.comment.localId));
     };
 
-    const top = this.props.layout.getCommentPosition(this.props.comment.localId);
+    const top = this.props.layout.getCommentPosition(
+      this.props.comment.localId
+    );
     const right = this.props.isFocused ? 50 : 0;
     return (
       <li

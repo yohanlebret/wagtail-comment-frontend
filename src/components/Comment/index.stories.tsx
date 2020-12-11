@@ -11,7 +11,7 @@ import {
 export default { title: 'Comment' };
 
 export function addNewComment() {
-   const store: Store = createStore(reducer);
+  const store: Store = createStore(reducer);
 
   addTestComment(store, {
     mode: 'creating',

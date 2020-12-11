@@ -1,5 +1,4 @@
-import { combineReducers } from 'redux';
-import type { Store as reduxStore } from 'redux';
+import { combineReducers, Store as reduxStore } from 'redux';
 
 import { reducer as commentsReducer } from './comments';
 import { reducer as settingsReducer } from './settings';
