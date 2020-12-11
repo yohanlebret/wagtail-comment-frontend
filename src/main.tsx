@@ -121,7 +121,11 @@ function renderCommentsUi(
         rel="stylesheet"
       />
       <style dangerouslySetInnerHTML={{ __html: styles }} />
-      <TopBarComponent store={store} strings={strings} />
+      <TopBarComponent
+        commentsEnabled={commentsEnabled}
+        store={store}
+        strings={strings}
+      />
       <ol className="comments-list">{commentsRendered}</ol>
     </root.div>
   );

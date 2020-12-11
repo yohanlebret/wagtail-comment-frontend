@@ -7,37 +7,36 @@ import Checkbox from '../widgets/Checkbox';
 import type { TranslatableStrings } from '../../main';
 
 export interface TopBarProps {
+  commentsEnabled: boolean;
   store: Store;
   strings: TranslatableStrings;
 }
 
-export default class TopBarComponent extends React.Component<TopBarProps> {
-  render() {
-    const { store, strings } = this.props;
-
-    const onChangeCommentsEnabled = (checked: boolean) => {
-      store.dispatch(
-        updateGlobalSettings({
-          commentsEnabled: checked,
-        })
-      );
-    };
-
-    const { commentsEnabled } = store.getState().settings;
-
-    return (
-      <div className="comments-topbar">
-        <ul className="comments-topbar__settings">
-          <li>
-            <Checkbox
-              id="show-comments"
-              label={strings.SHOW_COMMENTS}
-              onChange={onChangeCommentsEnabled}
-              checked={commentsEnabled}
-            />
-          </li>
-        </ul>
-      </div>
+export default function TopBarComponent({
+  commentsEnabled,
+  store,
+  strings,
+}: TopBarProps) {
+  const onChangeCommentsEnabled = (checked: boolean) => {
+    store.dispatch(
+      updateGlobalSettings({
+        commentsEnabled: checked,
+      })
     );
-  }
+  };
+
+  return (
+    <div className="comments-topbar">
+      <ul className="comments-topbar__settings">
+        <li>
+          <Checkbox
+            id="show-comments"
+            label={strings.SHOW_COMMENTS}
+            onChange={onChangeCommentsEnabled}
+            checked={commentsEnabled}
+          />
+        </li>
+      </ul>
+    </div>
+  );
 }
