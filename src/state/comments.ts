@@ -1,6 +1,6 @@
 import type { Annotation } from '../utils/annotation';
 import * as actions from '../actions/comments';
-import { Partial, update } from './utils';
+import { update } from './utils';
 
 export interface Author {
   id: any;
@@ -39,8 +39,8 @@ export function newCommentReply(
   author: Author | null,
   date: number,
   {
-    remoteId = <number | null>null,
-    mode = <CommentReplyMode>'default',
+    remoteId = null,
+    mode = 'default',
     text = '',
   }: NewReplyOptions
 ): CommentReply {
@@ -99,10 +99,10 @@ export function newComment(
   author: Author | null,
   date: number,
   {
-    remoteId = <number | null>null,
-    mode = <CommentMode>'default',
+    remoteId = null,
+    mode = 'default',
     text = '',
-    replies = <Map<number, CommentReply>> new Map(),
+    replies = new Map(),
   }: NewCommentOptions
 ): Comment {
   return {

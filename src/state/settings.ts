@@ -1,6 +1,6 @@
 import * as actions from '../actions/settings';
 import type { Author } from './comments';
-import { Partial, update } from './utils';
+import { update } from './utils';
 
 export interface SettingsState {
   user: Author | null;

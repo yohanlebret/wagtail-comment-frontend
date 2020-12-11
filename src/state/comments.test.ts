@@ -1,9 +1,9 @@
 import { basicCommentsState } from '../__fixtures__/state';
 import {
   Comment,
-  CommentMode,
   CommentReply,
-  CommentReplyMode,
+  CommentReplyUpdate,
+  CommentUpdate,
   reducer,
 } from './comments';
 import { createStore } from 'redux';
@@ -19,12 +19,12 @@ test('Initial comments state empty', () => {
 });
 
 test('New comment added to state', () => {
-  const newComment = {
+  const newComment: Comment = {
     contentpath: 'test_contentpath',
     localId: 5,
     annotation: null,
     remoteId: null,
-    mode: 'default' as CommentMode,
+    mode: 'default',
     deleted: false,
     author: { id: 1, name: 'test user' },
     date: 0,
@@ -33,7 +33,7 @@ test('New comment added to state', () => {
     editPreviousText: '',
     remoteReplyCount: 0,
     replies: new Map(),
-  } as Comment;
+  };
   const commentAction = actions.addComment(newComment);
   const newState = reducer(basicCommentsState, commentAction);
   expect(newState.comments.get(newComment.localId)).toBe(newComment);
@@ -43,12 +43,12 @@ test('New comment added to state', () => {
 });
 
 test('Remote comment added to state', () => {
-  const newComment = {
+  const newComment: Comment = {
     contentpath: 'test_contentpath',
     localId: 5,
     annotation: null,
     remoteId: 10,
-    mode: 'default' as CommentMode,
+    mode: 'default',
     deleted: false,
     author: { id: 1, name: 'test user' },
     date: 0,
@@ -57,7 +57,7 @@ test('Remote comment added to state', () => {
     editPreviousText: '',
     remoteReplyCount: 0,
     replies: new Map(),
-  } as Comment;
+  };
   const commentAction = actions.addComment(newComment);
   const newState = reducer(basicCommentsState, commentAction);
   expect(newState.comments.get(newComment.localId)).toBe(newComment);
@@ -67,8 +67,8 @@ test('Remote comment added to state', () => {
 });
 
 test('Existing comment updated', () => {
-  const commentUpdate = {
-    mode: 'editing' as CommentMode,
+  const commentUpdate: CommentUpdate = {
+    mode: 'editing',
   };
   const updateAction = actions.updateComment(1, commentUpdate);
   const newState = reducer(basicCommentsState, updateAction);
@@ -101,16 +101,16 @@ test('Comment focused', () => {
 });
 
 test('Reply added', () => {
-  const reply = {
+  const reply: CommentReply = {
     localId: 10,
     remoteId: null,
-    mode: 'default' as CommentReplyMode,
+    mode: 'default',
     author: { id: 1, name: 'test user' },
     date: 0,
     text: 'a new reply',
     editPreviousText: '',
     deleted: false,
-  } as CommentReply;
+  };
   const addAction = actions.addReply(1, reply);
   const newState = reducer(basicCommentsState, addAction);
   expect(newState.comments.get(1).replies.has(10)).toBe(true);
@@ -118,16 +118,16 @@ test('Reply added', () => {
 });
 
 test('Remote reply added', () => {
-  const reply = {
+  const reply: CommentReply = {
     localId: 10,
     remoteId: 1,
-    mode: 'default' as CommentReplyMode,
+    mode: 'default',
     author: { id: 1, name: 'test user' },
     date: 0,
     text: 'a new reply',
     editPreviousText: '',
     deleted: false,
-  } as CommentReply;
+  };
   const addAction = actions.addReply(1, reply);
   const newState = reducer(basicCommentsState, addAction);
   expect(newState.comments.get(1).replies.has(10)).toBe(true);
@@ -138,8 +138,8 @@ test('Remote reply added', () => {
 });
 
 test('Reply updated', () => {
-  const replyUpdate = {
-    mode: 'editing' as CommentReplyMode,
+  const replyUpdate: CommentReplyUpdate = {
+    mode: 'editing',
   };
   const updateAction = actions.updateReply(1, 2, replyUpdate);
   const newState = reducer(basicCommentsState, updateAction);
