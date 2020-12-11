@@ -20,7 +20,7 @@ import CommentComponent from './components/Comment';
 import { CommentFormSetComponent } from './components/Form';
 import TopBarComponent from './components/TopBar';
 
-import styles from '!css-to-string-loader!css-loader!sass-loader!./main.scss';
+import styles from '!css-to-string-loader!css-loader!sass-loader!./main.scss'; // eslint-disable-line import/no-unresolved
 
 export interface Widget {
   contentpath: string;
