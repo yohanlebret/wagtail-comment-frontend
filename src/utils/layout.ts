@@ -81,16 +81,14 @@ export class LayoutController {
 
     // Build list of blocks (starting with one for each comment)
     let blocks: Block[] = Array.from(this.commentElements.keys()).map(
-      (commentId) => {
-        return {
-          position: this.commentDesiredPositions.get(commentId),
-          height: this.commentHeights.get(commentId),
-          comments: [commentId],
-          containsPinnedComment:
+      (commentId) => ({
+        position: this.commentDesiredPositions.get(commentId),
+        height: this.commentHeights.get(commentId),
+        comments: [commentId],
+        containsPinnedComment:
             this.pinnedComment !== null && commentId === this.pinnedComment,
-          pinnedCommentPosition: 0,
-        };
-      }
+        pinnedCommentPosition: 0,
+      })
     );
 
     // Sort blocks

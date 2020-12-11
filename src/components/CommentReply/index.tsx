@@ -331,33 +331,33 @@ export default class CommentReplyComponent extends React.Component<CommentReplyP
     let inner: React.ReactFragment;
 
     switch (this.props.reply.mode) {
-      case 'editing':
-        inner = this.renderEditing();
-        break;
+    case 'editing':
+      inner = this.renderEditing();
+      break;
 
-      case 'saving':
-        inner = this.renderSaving();
-        break;
+    case 'saving':
+      inner = this.renderSaving();
+      break;
 
-      case 'save_error':
-        inner = this.renderSaveError();
-        break;
+    case 'save_error':
+      inner = this.renderSaveError();
+      break;
 
-      case 'delete_confirm':
-        inner = this.renderDeleteConfirm();
-        break;
+    case 'delete_confirm':
+      inner = this.renderDeleteConfirm();
+      break;
 
-      case 'deleting':
-        inner = this.renderDeleting();
-        break;
+    case 'deleting':
+      inner = this.renderDeleting();
+      break;
 
-      case 'delete_error':
-        inner = this.renderDeleteError();
-        break;
+    case 'delete_error':
+      inner = this.renderDeleteError();
+      break;
 
-      default:
-        inner = this.renderDefault();
-        break;
+    default:
+      inner = this.renderDefault();
+      break;
     }
 
     return (

@@ -543,37 +543,37 @@ export default class CommentComponent extends React.Component<CommentProps> {
     let inner: React.ReactFragment;
 
     switch (this.props.comment.mode) {
-      case 'creating':
-        inner = this.renderCreating();
-        break;
+    case 'creating':
+      inner = this.renderCreating();
+      break;
 
-      case 'editing':
-        inner = this.renderEditing();
-        break;
+    case 'editing':
+      inner = this.renderEditing();
+      break;
 
-      case 'saving':
-        inner = this.renderSaving();
-        break;
+    case 'saving':
+      inner = this.renderSaving();
+      break;
 
-      case 'save_error':
-        inner = this.renderSaveError();
-        break;
+    case 'save_error':
+      inner = this.renderSaveError();
+      break;
 
-      case 'delete_confirm':
-        inner = this.renderDeleteConfirm();
-        break;
+    case 'delete_confirm':
+      inner = this.renderDeleteConfirm();
+      break;
 
-      case 'deleting':
-        inner = this.renderDeleting();
-        break;
+    case 'deleting':
+      inner = this.renderDeleting();
+      break;
 
-      case 'delete_error':
-        inner = this.renderDeleteError();
-        break;
+    case 'delete_error':
+      inner = this.renderDeleteError();
+      break;
 
-      default:
-        inner = this.renderDefault();
-        break;
+    default:
+      inner = this.renderDefault();
+      break;
     }
 
     const onClick = () => {

@@ -28,11 +28,11 @@ export function reducer(
   }
 
   switch (action.type) {
-    case actions.UPDATE_GLOBAL_SETTINGS:
-      newState = update(state, action.update);
-      break;
+  case actions.UPDATE_GLOBAL_SETTINGS:
+    newState = update(state, action.update);
+    break;
 
-    default:
+  default:
     // Do nothing (linting wants this to be explicit)
   }
 
