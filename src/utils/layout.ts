@@ -94,7 +94,9 @@ export class LayoutController {
     );
 
     // Sort blocks
-    blocks.sort((a, b) => a.position - b.position);
+    blocks.sort(
+      (block, comparisonBlock) => block.position - comparisonBlock.position
+    );
 
     // Resolve overlapping blocks
     let overlaps = true;
