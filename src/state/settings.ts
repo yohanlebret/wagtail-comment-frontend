@@ -29,15 +29,19 @@ export function reducer(
   state: SettingsState | undefined,
   action: actions.Action
 ) {
+  let newState = state;
   if (typeof state === 'undefined') {
-    state = initialState();
+    newState = initialState();
   }
 
   switch (action.type) {
     case actions.UPDATE_GLOBAL_SETTINGS:
-      state = update(state, action.update);
+      newState = update(state, action.update);
       break;
+
+    default:
+    // Do nothing (linting wants this to be explicit)
   }
 
-  return state;
+  return newState;
 }
