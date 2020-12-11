@@ -1,9 +1,6 @@
 import * as actions from '../actions/settings';
 import type { Author } from './comments';
-
-type Partial<T> = {
-  [P in keyof T]?: T[P];
-};
+import { Partial, update } from './utils';
 
 export interface SettingsState {
   user: Author | null;
@@ -19,10 +16,6 @@ export function initialState(): SettingsState {
     commentsEnabled: true,
     showResolvedComments: false,
   };
-}
-
-function update<T>(base: T, update: Partial<T>): T {
-  return Object.assign({}, base, update);
 }
 
 export function reducer(

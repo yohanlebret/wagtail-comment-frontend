@@ -1,9 +1,6 @@
 import type { Annotation } from '../utils/annotation';
 import * as actions from '../actions/comments';
-
-type Partial<T> = {
-  [P in keyof T]?: T[P];
-};
+import { Partial, update } from './utils';
 
 export interface Author {
   id: any;
@@ -144,10 +141,6 @@ function initialState(): CommentsState {
     pinnedComment: null,
     remoteCommentCount: 0,
   };
-}
-
-function update<T>(base: T, update: Partial<T>): T {
-  return Object.assign({}, base, update);
 }
 
 function cloneComments(state: CommentsState): CommentsState {
