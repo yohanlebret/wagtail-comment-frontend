@@ -7,17 +7,17 @@ import Checkbox from '.';
 export default { title: 'Checkbox' };
 
 export function checkbox() {
-    const [checked, setChecked] = React.useState(false);
+  const [checked, setChecked] = React.useState(false);
 
-    return (
-        <>
-            <Styling />
-            <Checkbox
-                id="id"
-                label="Checkbox"
-                checked={checked}
-                onChange={setChecked}
-            />
-        </>
-    );
+  return (
+    <>
+      <Styling />
+      <Checkbox
+        id="id"
+        label="Checkbox"
+        checked={checked}
+        onChange={setChecked}
+      />
+    </>
+  );
 }
