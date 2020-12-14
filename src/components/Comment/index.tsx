@@ -13,7 +13,7 @@ import {
 } from '../../actions/comments';
 import { LayoutController } from '../../utils/layout';
 import { getNextReplyId } from '../../utils/sequences';
-import CommentReplyComponent, { saveCommentReply } from '../CommentReply';
+import CommentReplyComponent from '../CommentReply';
 import type { TranslatableStrings } from '../../main';
 
 async function saveComment(comment: Comment, store: Store) {
@@ -27,6 +27,7 @@ async function saveComment(comment: Comment, store: Store) {
     store.dispatch(
       updateComment(comment.localId, {
         mode: 'default',
+        text: comment.newText,
         remoteId: comment.remoteId,
         author: comment.author,
         date: comment.date,
@@ -112,7 +113,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
       const replyId = getNextReplyId();
       const reply = newCommentReply(replyId, null, Date.now(), {
         text: comment.newReply,
-        mode: 'saving',
+        mode: 'default',
       });
       store.dispatch(addReply(comment.localId, reply));
 
@@ -121,8 +122,6 @@ export default class CommentComponent extends React.Component<CommentProps> {
           newReply: '',
         })
       );
-
-      await saveCommentReply(comment, reply, store);
     };
 
     const onClickCancelReply = (e: React.MouseEvent) => {
@@ -212,7 +211,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
 
       store.dispatch(
         updateComment(comment.localId, {
-          text: e.target.value,
+          newText: e.target.value,
         })
       );
     };
@@ -237,7 +236,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
         <form onSubmit={onSave}>
           <textarea
             className="comment__input"
-            value={comment.text}
+            value={comment.newText}
             onChange={onChangeText}
             style={{ resize: 'none' }}
             placeholder="Enter your comments..."
@@ -270,7 +269,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
 
       store.dispatch(
         updateComment(comment.localId, {
-          text: e.target.value,
+          newText: e.target.value,
         })
       );
     };
@@ -287,7 +286,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
       store.dispatch(
         updateComment(comment.localId, {
           mode: 'default',
-          text: comment.editPreviousText,
+          newText: comment.text,
         })
       );
     };
@@ -297,7 +296,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
         <form onSubmit={onSave}>
           <textarea
             className="comment__input"
-            value={comment.text}
+            value={comment.newText}
             onChange={onChangeText}
             style={{ resize: 'none' }}
           />
@@ -475,7 +474,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
       store.dispatch(
         updateComment(comment.localId, {
           mode: 'editing',
-          editPreviousText: comment.text,
+          newText: comment.text,
         })
       );
     };

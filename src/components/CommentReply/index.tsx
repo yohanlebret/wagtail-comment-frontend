@@ -21,6 +21,7 @@ export async function saveCommentReply(
     store.dispatch(
       updateReply(comment.localId, reply.localId, {
         mode: 'default',
+        text: reply.newText,
         author: reply.author,
       })
     );
@@ -85,7 +86,7 @@ export default class CommentReplyComponent extends React.Component<CommentReplyP
 
       store.dispatch(
         updateReply(comment.localId, reply.localId, {
-          text: e.target.value,
+          newText: e.target.value,
         })
       );
     };
@@ -101,7 +102,7 @@ export default class CommentReplyComponent extends React.Component<CommentReplyP
       store.dispatch(
         updateReply(comment.localId, reply.localId, {
           mode: 'default',
-          text: reply.editPreviousText,
+          newText: reply.text,
         })
       );
     };
@@ -110,7 +111,7 @@ export default class CommentReplyComponent extends React.Component<CommentReplyP
       <form onSubmit={onSave}>
         <textarea
           className="comment-reply__input"
-          value={reply.text}
+          value={reply.newText}
           onChange={onChangeText}
           style={{ resize: 'none' }}
         />
@@ -281,7 +282,7 @@ export default class CommentReplyComponent extends React.Component<CommentReplyP
       store.dispatch(
         updateReply(comment.localId, reply.localId, {
           mode: 'editing',
-          editPreviousText: reply.text,
+          newText: reply.text,
         })
       );
     };
