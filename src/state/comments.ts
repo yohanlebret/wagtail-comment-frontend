@@ -25,6 +25,7 @@ export interface CommentReply {
   date: number;
   text: string;
   newText: string;
+  message: string;
   deleted: boolean;
 }
 
@@ -52,6 +53,7 @@ export function newCommentReply(
     date,
     text,
     newText: '',
+    message: '',
     deleted: false,
   };
 }
@@ -82,6 +84,7 @@ export interface Comment {
   replies: Map<number, CommentReply>;
   newReply: string;
   newText: string;
+  message: string;
   remoteReplyCount: number;
 }
 
@@ -118,6 +121,7 @@ export function newComment(
     newReply: '',
     newText: '',
     deleted: false,
+    message: '',
     remoteReplyCount: Array.from(replies.values()).reduce(
       (n, reply) => (reply.remoteId !== null ? n + 1 : n),
       0

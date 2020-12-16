@@ -31,6 +31,7 @@ test('New comment added to state', () => {
     text: 'new comment',
     newReply: '',
     newText: '',
+    message: '',
     remoteReplyCount: 0,
     replies: new Map(),
   };
@@ -55,6 +56,7 @@ test('Remote comment added to state', () => {
     text: 'new comment',
     newReply: '',
     newText: '',
+    message: '',
     remoteReplyCount: 0,
     replies: new Map(),
   };
@@ -109,6 +111,7 @@ test('Reply added', () => {
     date: 0,
     text: 'a new reply',
     newText: '',
+    message: '',
     deleted: false,
   };
   const addAction = actions.addReply(1, reply);
@@ -126,6 +129,7 @@ test('Remote reply added', () => {
     date: 0,
     text: 'a new reply',
     newText: '',
+    message: '',
     deleted: false,
   };
   const addAction = actions.addReply(1, reply);

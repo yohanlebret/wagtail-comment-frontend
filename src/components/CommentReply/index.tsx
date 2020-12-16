@@ -5,11 +5,45 @@ import type { Store } from '../../state';
 import type { Comment, CommentReply, Author } from '../../state/comments';
 import { updateReply, deleteReply } from '../../actions/comments';
 import type { TranslatableStrings } from '../../main';
+import CommentMessage from '../CommentMessage';
+
+export function addRemoteWarningMessage(
+  comment: Comment,
+  reply: CommentReply,
+  message: string,
+  store: Store,
+  addIfLocal = false,
+  onFinish?: () => void
+) {
+  if (addIfLocal || reply.remoteId !== null) {
+    // Only add the warning message if the reply actually exists in the db, or addIfLocal is true - editing a comment you've created
+    // locally, for instance, requires no such warning
+    store.dispatch(
+      updateReply(comment.localId, reply.localId, {
+        message: message,
+      })
+    );
+    window.setTimeout(() => {
+      store.dispatch(
+        updateReply(comment.localId, reply.localId, {
+          message: '',
+        })
+      );
+      if (onFinish !== undefined) {
+        onFinish();
+      }
+    },
+    1500);
+  } else if (onFinish !== undefined) {
+    onFinish();
+  }
+}
 
 export async function saveCommentReply(
   comment: Comment,
   reply: CommentReply,
-  store: Store
+  store: Store,
+  strings: TranslatableStrings
 ) {
   store.dispatch(
     updateReply(comment.localId, reply.localId, {
@@ -25,6 +59,7 @@ export async function saveCommentReply(
         author: reply.author,
       })
     );
+    addRemoteWarningMessage(comment, reply, strings.SAVE_COMMENT_WARNING, store);
   } catch (err) {
     console.error(err);
     store.dispatch(
@@ -38,7 +73,8 @@ export async function saveCommentReply(
 async function deleteCommentReply(
   comment: Comment,
   reply: CommentReply,
-  store: Store
+  store: Store,
+  strings: TranslatableStrings
 ) {
   store.dispatch(
     updateReply(comment.localId, reply.localId, {
@@ -46,15 +82,19 @@ async function deleteCommentReply(
     })
   );
 
-  try {
-    store.dispatch(deleteReply(comment.localId, reply.localId));
-  } catch (err) {
-    store.dispatch(
-      updateReply(comment.localId, reply.localId, {
-        mode: 'delete_error',
-      })
-    );
-  }
+  addRemoteWarningMessage(comment, reply, strings.SAVE_COMMENT_WARNING, store, false, () => {
+    // Only try to delete the comment when the message times out
+    try {
+      store.dispatch(deleteReply(comment.localId, reply.localId));
+    } catch (err) {
+      console.error(err);
+      store.dispatch(
+        updateReply(comment.localId, reply.localId, {
+          mode: 'delete_error',
+        })
+      );
+    }
+  });
 }
 
 export interface CommentReplyProps {
@@ -78,6 +118,15 @@ export default class CommentReplyComponent extends React.Component<CommentReplyP
     );
   }
 
+  renderMessage(): React.ReactFragment {
+    const { reply } = this.props;
+
+    if (reply.message !== '') {
+      return <CommentMessage message={reply.message} />;
+    }
+    return null;
+  }
+
   renderEditing(): React.ReactFragment {
     const { comment, reply, store, strings } = this.props;
 
@@ -93,7 +142,7 @@ export default class CommentReplyComponent extends React.Component<CommentReplyP
 
     const onSave = async (e: React.FormEvent) => {
       e.preventDefault();
-      await saveCommentReply(comment, reply, store);
+      await saveCommentReply(comment, reply, store, strings);
     };
 
     const onCancel = (e: React.MouseEvent) => {
@@ -152,7 +201,7 @@ export default class CommentReplyComponent extends React.Component<CommentReplyP
     const onClickRetry = async (e: React.MouseEvent) => {
       e.preventDefault();
 
-      await saveCommentReply(comment, reply, store);
+      await saveCommentReply(comment, reply, store, strings);
     };
 
     return (
@@ -179,7 +228,7 @@ export default class CommentReplyComponent extends React.Component<CommentReplyP
     const onClickDelete = async (e: React.MouseEvent) => {
       e.preventDefault();
 
-      await deleteCommentReply(comment, reply, store);
+      await deleteCommentReply(comment, reply, store, strings);
     };
 
     const onClickCancel = (e: React.MouseEvent) => {
@@ -235,7 +284,7 @@ export default class CommentReplyComponent extends React.Component<CommentReplyP
     const onClickRetry = async (e: React.MouseEvent) => {
       e.preventDefault();
 
-      await deleteCommentReply(comment, reply, store);
+      await deleteCommentReply(comment, reply, store, strings);
     };
 
     const onClickCancel = async (e: React.MouseEvent) => {
@@ -367,6 +416,7 @@ export default class CommentReplyComponent extends React.Component<CommentReplyP
         className={`comment-reply comment-reply--mode-${this.props.reply.mode}`}
         data-reply-id={this.props.reply.localId}
       >
+        {this.renderMessage()}
         {inner}
       </li>
     );

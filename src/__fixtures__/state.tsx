@@ -9,6 +9,7 @@ const remoteReply: CommentReply = {
   date: 0,
   text: 'a reply',
   newText: '',
+  message: '',
   deleted: false,
 };
 
@@ -20,6 +21,7 @@ const localReply: CommentReply = {
   date: 0,
   text: 'another reply',
   newText: '',
+  message: '',
   deleted: false,
 };
 
@@ -35,6 +37,7 @@ const remoteComment: Comment = {
   text: 'test text',
   newReply: '',
   newText: '',
+  message: '',
   remoteReplyCount: 1,
   replies: new Map([[remoteReply.localId, remoteReply], [localReply.localId, localReply]]),
 };
@@ -51,6 +54,7 @@ const localComment: Comment = {
   text: 'unsaved comment',
   newReply: '',
   newText: '',
+  message: '',
   replies: new Map(),
   remoteReplyCount: 0,
 };

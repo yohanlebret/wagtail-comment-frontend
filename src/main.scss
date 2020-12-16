@@ -52,9 +52,18 @@ $color-textarea-background: #5b5b5b;
   outline: $color-focus-outline auto 3px;
 }
 
+@mixin clearfix {
+  &::after {
+    content:".";
+    display:block;
+    height:0;
+    clear:both;
+    visibility:hidden;
+  }
+}
+
 @mixin box {
   background-color: $color-box-background;
-  padding: 20px;
   box-shadow: 0px 0px 15px 0px rgba(0, 0, 0, 0.29);
   font-size: 16px;
   border-radius: 3px;

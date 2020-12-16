@@ -46,6 +46,7 @@ export interface TranslatableStrings {
   DELETE_ERROR: string;
   CONFIRM_DELETE_COMMENT: string;
   SAVE_ERROR: string;
+  SAVE_COMMENT_WARNING: string;
 }
 
 export const defaultStrings = {
@@ -62,6 +63,7 @@ export const defaultStrings = {
   DELETE_ERROR: 'Delete error',
   CONFIRM_DELETE_COMMENT: 'Are you sure?',
   SAVE_ERROR: 'Save error',
+  SAVE_COMMENT_WARNING: 'This will be saved when the page is saved',
 };
 
 /* eslint-disable camelcase */

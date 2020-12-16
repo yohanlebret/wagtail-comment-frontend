@@ -8,10 +8,6 @@
   transition: top 0.5s ease 0s, right 0.5s ease 0s, height 0.5s ease 0s;
   pointer-events: auto;
 
-  &--mode-creating {
-    padding: 10px;
-  }
-
   &__text {
     color: $color-white;
     font-size: 1em;
@@ -22,6 +18,33 @@
     &--mode-deleting {
       color: $color-grey-1;
     }
+  }
+
+  &__container {
+    position: relative;
+    padding: 20px;
+
+    &--mode-creating {
+      padding: 10px;
+    }
+  }
+
+  &__reply-form {
+    padding: 0px 10px 10px 10px;
+  }
+
+  &__overlay {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: $color-blue;
+    opacity: 1;
+    display: flex;
+    justify-content: center;
+    border-radius: 5px;
+    align-items: center;
   }
 
   &__author-date {
@@ -43,6 +66,10 @@
 
   &__button {
     @include button;
+  }
+
+  &__actions {
+    @include clearfix;
   }
 
   &__actions &__button,
@@ -110,5 +137,6 @@
 
   &__reply-input {
     margin-top: 20px !important;
+    padding: 20px;
   }
 }
