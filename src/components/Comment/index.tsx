@@ -126,10 +126,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
   renderMessage(): React.ReactFragment {
     const { comment } = this.props;
 
-    if (comment.message !== '') {
-      return <CommentMessage message={comment.message} />;
-    }
-    return null;
+    return <CommentMessage message={comment.message} />;
   }
 
   renderReplies({ hideNewReply = false } = {}): React.ReactFragment {

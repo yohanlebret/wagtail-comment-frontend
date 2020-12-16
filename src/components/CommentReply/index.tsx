@@ -121,10 +121,7 @@ export default class CommentReplyComponent extends React.Component<CommentReplyP
   renderMessage(): React.ReactFragment {
     const { reply } = this.props;
 
-    if (reply.message !== '') {
-      return <CommentMessage message={reply.message} />;
-    }
-    return null;
+    return <CommentMessage message={reply.message} />;
   }
 
   renderEditing(): React.ReactFragment {
