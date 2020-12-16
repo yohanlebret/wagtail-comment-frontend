@@ -203,26 +203,7 @@ export default class CommentComponent extends React.Component<CommentProps> {
     const newReplyHidden = hideNewReply || replyBeingEdited;
 
     let replyActions = <></>;
-    if (!newReplyHidden && isFocused && comment.newReply.length > 0) {
-      replyActions = (
-        <div className="comment__reply-actions">
-          <button
-            type="submit"
-            className="comment__button comment__button--primary"
-          >
-            {strings.REPLY}
-          </button>
-          <button
-            type="button"
-            onClick={onClickCancelReply}
-            className="comment__button"
-          >
-            {strings.CANCEL}
-          </button>
-        </div>
-      );
-    }
-
+    let replyForm = <></>;
     let replyTextarea = <></>;
     if (!newReplyHidden && (isFocused || comment.newReply)) {
       replyTextarea = (
@@ -234,15 +215,37 @@ export default class CommentComponent extends React.Component<CommentProps> {
           style={{ resize: 'none' }}
         />
       );
+      if (comment.newReply.length > 0) {
+        replyActions = (
+          <div className="comment__reply-actions">
+            <button
+              type="submit"
+              className="comment__button comment__button--primary"
+            >
+              {strings.REPLY}
+            </button>
+            <button
+              type="button"
+              onClick={onClickCancelReply}
+              className="comment__button"
+            >
+              {strings.CANCEL}
+            </button>
+          </div>
+        );
+      }
+      replyForm = (
+        <form className="comment__reply-form" onSubmit={sendReply}>
+          {replyTextarea}
+          {replyActions}
+        </form>
+      );
     }
 
     return (
       <>
         <ul className="comment__replies">{replies}</ul>
-        <form className="comment__reply-form" onSubmit={sendReply}>
-          {replyTextarea}
-          {replyActions}
-        </form>
+        {replyForm}
       </>
     );
   }
