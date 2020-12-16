@@ -12,10 +12,10 @@ export default function CommentMessage({
     <CSSTransition
       in={message !== ''}
       timeout={400}
-      classNames="comment__overlay-"
+      classNames="comment-message-"
       unmountOnExit
     >
-      <div className="comment__overlay" role="alert">
+      <div className="comment-message" role="alert">
         {message}
       </div>
     </CSSTransition>
