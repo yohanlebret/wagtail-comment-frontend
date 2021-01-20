@@ -190,7 +190,6 @@ export function initCommentsApp(
         if (state.comments.comments.has(focusedComment)) {
           const annotation = state.comments.comments.get(focusedComment)
             .annotation;
-
           if (annotation) {
             annotation.onUnfocus();
           }

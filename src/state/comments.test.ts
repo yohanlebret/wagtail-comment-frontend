@@ -91,6 +91,7 @@ test('Remote comment deleted', () => {
   expect(newState.comments.has(1)).toBe(true);
   expect(newState.comments.get(1).deleted).toBe(true);
   expect(newState.focusedComment).toBe(null);
+  expect(newState.pinnedComment).toBe(null);
   expect(newState.remoteCommentCount).toBe(
     basicCommentsState.remoteCommentCount
   );
@@ -100,6 +101,18 @@ test('Comment focused', () => {
   const focusAction = actions.setFocusedComment(4);
   const newState = reducer(basicCommentsState, focusAction);
   expect(newState.focusedComment).toBe(4);
+});
+
+test('Invalid comment not focused', () => {
+  const focusAction = actions.setFocusedComment(9000);
+  const newState = reducer(basicCommentsState, focusAction);
+  expect(newState.focusedComment).toBe(basicCommentsState.focusedComment);
+});
+
+test('Invalid comment not pinned', () => {
+  const pinAction = actions.setPinnedComment(9000);
+  const newState = reducer(basicCommentsState, pinAction);
+  expect(newState.pinnedComment).toBe(basicCommentsState.pinnedComment);
 });
 
 test('Reply added', () => {

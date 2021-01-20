@@ -207,17 +207,24 @@ export function reducer(
     if (state.focusedComment === action.commentId) {
       newState.focusedComment = null;
     }
+    if (state.pinnedComment === action.commentId) {
+      newState.pinnedComment = null;
+    }
     break;
 
   case actions.SET_FOCUSED_COMMENT:
-    newState = cloneComments(newState);
-    newState.focusedComment = action.commentId;
+    if ((action.commentId === null) || (state.comments.has(action.commentId))) {
+      newState = cloneComments(newState);
+      newState.focusedComment = action.commentId;
+    }
     break;
 
   case actions.SET_PINNED_COMMENT:
-    newState = update(newState, {
-      pinnedComment: action.commentId,
-    });
+    if ((action.commentId === null) || (state.comments.has(action.commentId))) {
+      newState = update(newState, {
+        pinnedComment: action.commentId,
+      });
+    }
     break;
 
   case actions.ADD_REPLY: {
