@@ -1,5 +1,5 @@
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import React from 'react';
+import ReactDOM from 'react-dom';
 import { createStore } from 'redux';
 import root from 'react-shadow';
 
@@ -8,7 +8,6 @@ import { LayoutController } from './utils/layout';
 import { getNextCommentId, getNextReplyId } from './utils/sequences';
 import { Store, reducer } from './state';
 import type {
-    Author,
     Comment,
 } from './state/comments';
 import {
@@ -24,16 +23,17 @@ import {
 } from './actions/comments';
 import { selectCommentsForContentPathFactory } from './selectors';
 import CommentComponent from './components/Comment';
+import { CommentFormSetComponent } from './components/Form'
 import TopBarComponent from './components/TopBar';
 
-import * as styles from '!css-to-string-loader!css-loader!sass-loader!./main.scss';
+import styles from '!css-to-string-loader!css-loader!sass-loader!./main.scss';
 
 export interface Widget {
-    contentPath: string;
+    contentpath: string;
     setEnabled(enabled: boolean): void;
     onChangeComments(comments: Comment[]): void;
     getAnnotationForComment(comment: Comment): Annotation;
-    onRegister(makeComment: (annotation: Annotation, contentPath: string) => void): void
+    onRegister(makeComment: (annotation: Annotation, contentpath: string) => void): void
 }
 
 export interface TranslatableStrings {
@@ -42,10 +42,10 @@ export interface TranslatableStrings {
     CANCEL: string;
     DELETE: string;
     DELETING: string;
-    SHOW_RESOLVED_COMMENTS: string;
     SHOW_COMMENTS: string;
     EDIT: string;
     REPLY: string;
+    RESOLVE: string;
     RETRY: string;
     DELETE_ERROR: string;
     CONFIRM_DELETE_COMMENT: string;
@@ -58,10 +58,10 @@ export const defaultStrings = {
     CANCEL: 'Cancel',
     DELETE: 'Delete',
     DELETING: 'Deleting...',
-    SHOW_RESOLVED_COMMENTS: 'Show resolved comments',
     SHOW_COMMENTS: 'Show comments',
     EDIT: 'Edit',
     REPLY: 'Reply',
+    RESOLVE: 'Resolve',
     RETRY: 'Retry',
     DELETE_ERROR: 'Delete error',
     CONFIRM_DELETE_COMMENT: 'Are you sure?',
@@ -69,8 +69,8 @@ export const defaultStrings = {
 }
 
 export interface InitialCommentReply {
-    id: number;
-    author: Author;
+    pk: number;
+    user: any;
     text: string;
     created_at: string;
     updated_at: string;
@@ -78,14 +78,13 @@ export interface InitialCommentReply {
 
 
 export interface InitialComment {
-    id: number;
-    author: Author;
+    pk: number;
+    user: any;
     text: string;
     created_at: string;
     updated_at: string;
-    resolved_at: string;
     replies: InitialCommentReply[];
-    content_path: string;
+    contentpath: string;
 }
 
 function renderCommentsUi(
@@ -96,21 +95,15 @@ function renderCommentsUi(
 ): React.ReactElement {
     let {
         commentsEnabled,
-        showResolvedComments,
         user
     } = store.getState().settings;
     let commentsToRender = comments;
 
     if (!commentsEnabled || !user) {
         commentsToRender = [];
-    } else if (!showResolvedComments) {
-        // Hide all resolved comments unless they were resolved this session
-        commentsToRender = commentsToRender.filter(comment => {
-            return !(
-                comment.resolvedAt !== null && !comment.resolvedThisSession
-            );
-        });
     }
+    // Hide all resolved/deleted comments
+    commentsToRender = commentsToRender.filter(({ deleted }) => !deleted);
     let commentsRendered = commentsToRender.map(comment => (
         <CommentComponent
             key={comment.localId}
@@ -137,17 +130,22 @@ function renderCommentsUi(
 
 export function initCommentsApp(
     element: HTMLElement,
-    author: Author,
+    outputElement: HTMLElement,
+    userId: any,
     initialComments: InitialComment[],
+    authors: Map<string, string>,
     strings: TranslatableStrings | null
 ) {
     let focusedComment: number | null = null;
     let pinnedComment: number | null = null;
+    const user = {
+        id: userId,
+        name: authors.get(String(userId))
+    }
 
     let store: Store = createStore(reducer, {settings: {
-        user: author,
+        user: user,
         commentsEnabled: true,
-        showResolvedComments: false
     }});
     let layout = new LayoutController();
 
@@ -166,10 +164,12 @@ export function initCommentsApp(
     }
 
     let render = () => {
-        let state = store.getState();
-        let commentList: Comment[] = Array.from(
+        const state = store.getState();
+        const commentList: Comment[] = Array.from(
             state.comments.comments.values()
         );
+
+        ReactDOM.render(<CommentFormSetComponent comments={commentList} remoteCommentCount={state.comments.remoteCommentCount} />, outputElement);
 
         // Check if the focused comment has changed
         if (state.comments.focusedComment != focusedComment) {
@@ -223,8 +223,7 @@ export function initCommentsApp(
             () => {
                 // Render again if layout has changed (eg, a comment was added, deleted or resized)
                 // This will just update the "top" style attributes in the comments to get them to move
-                layout.refresh()
-                if (layout.isDirty) {
+                if (layout.refresh()) {
                     ReactDOM.render(
                         renderCommentsUi(
                             store,
@@ -239,10 +238,6 @@ export function initCommentsApp(
         );
     };
 
-    render();
-
-    store.subscribe(render);
-
     // Fetch existing comments
     for (let comment of initialComments) {
 
@@ -252,16 +247,13 @@ export function initCommentsApp(
         store.dispatch(
             addComment(
                 newComment(
-                    comment.content_path,
+                    comment.contentpath,
                     commentId,
                     null,
-                    comment.author,
+                    {id: comment.user, name: authors.get(String(comment.user))},
                     Date.parse(comment.created_at),
                     {
-                        remoteId: comment.id,
-                        resolvedAt: comment.resolved_at
-                            ? Date.parse(comment.resolved_at)
-                            : null,
+                        remoteId: comment.pk,
                         text: comment.text
                     }
                 )
@@ -275,9 +267,9 @@ export function initCommentsApp(
                     commentId,
                     newCommentReply(
                         getNextReplyId(),
-                        reply.author,
+                        {id: reply.user, name: authors.get(String(reply.user))},
                         Date.parse(reply.created_at),
-                        { remoteId: reply.id, text: reply.text }
+                        { remoteId: reply.pk, text: reply.text }
                     )
                 )
             );
@@ -287,17 +279,10 @@ export function initCommentsApp(
         // TODO: Scroll to this comment
         if (
             initialFocusedCommentId &&
-            comment.id == initialFocusedCommentId
+            comment.pk == initialFocusedCommentId
         ) {
             store.dispatch(setFocusedComment(commentId));
             store.dispatch(setPinnedComment(commentId));
-
-            // HACK: If the comment is resolved. Set that comments "resolvedInThisSession" field so it displays
-            if (comment.resolved_at !== null) {
-                store.dispatch(
-                    updateComment(commentId, { resolvedThisSession: true })
-                );
-            }
         }
     }
 
@@ -314,7 +299,7 @@ export function initCommentsApp(
         layout.setCommentAnnotation(commentId, annotation);
     };
 
-    let makeComment = (annotation: Annotation, contentPath: string) => {
+    let makeComment = (annotation: Annotation, contentpath: string) => {
         let commentId = getNextCommentId();
 
         attachAnnotationLayout(annotation, commentId);
@@ -322,7 +307,7 @@ export function initCommentsApp(
         // Create the comment
         store.dispatch(
             addComment(
-                newComment(contentPath, commentId, annotation, store.getState().settings.user, Date.now(), {
+                newComment(contentpath, commentId, annotation, store.getState().settings.user, Date.now(), {
                     mode: 'creating'
                 })
             )
@@ -345,7 +330,7 @@ export function initCommentsApp(
                 widget.setEnabled(currentlyEnabled);
             }
         })
-        const selectCommentsForContentPath = selectCommentsForContentPathFactory(widget.contentPath)
+        const selectCommentsForContentPath = selectCommentsForContentPathFactory(widget.contentpath)
         let currentComments = selectCommentsForContentPath(state);
         let unsubscribeWidgetComments = store.subscribe(() => {
             let previousComments = currentComments;
@@ -355,7 +340,7 @@ export function initCommentsApp(
             }
         })
         state.comments.comments.forEach((comment) => {
-            if (comment.contentPath == widget.contentPath) {
+            if (comment.contentpath == widget.contentpath) {
                 const annotation = widget.getAnnotationForComment(comment);
                 attachAnnotationLayout(annotation, comment.localId);
                 store.dispatch(
@@ -370,6 +355,10 @@ export function initCommentsApp(
 
         return {unsubscribeWidgetEnable, unsubscribeWidgetComments}
     }
+
+    render();
+
+    store.subscribe(render);
 
     // Unfocus when document body is clicked
     document.body.addEventListener('click', e => {

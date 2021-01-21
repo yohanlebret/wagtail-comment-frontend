@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import { createStore } from 'redux';
 
 import { Store, reducer } from '../../state';
@@ -54,18 +54,6 @@ export function focused() {
         mode: 'default',
         text: 'An example comment',
         focused: true
-    });
-
-    return <RenderCommentsForStorybook store={store} />;
-}
-
-export function resolved() {
-    let store: Store = createStore(reducer);
-
-    addTestComment(store, {
-        mode: 'default',
-        text: 'An example comment',
-        resolvedAt: Date.now()
     });
 
     return <RenderCommentsForStorybook store={store} />;

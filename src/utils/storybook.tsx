@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 
 import { Store } from '../state';
 import {
@@ -19,7 +19,7 @@ import { LayoutController } from '../utils/layout';
 import { getNextCommentId } from './sequences';
 import { defaultStrings } from '../main'
 
-import * as styles from '!css-to-string-loader!css-loader!sass-loader!./../main.scss';
+import styles from '!css-to-string-loader!css-loader!sass-loader!./../main.scss';
 import CommentComponent from '../components/Comment/index';
 
 export function Styling() {

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 
 import type { Store } from '../../state';
 import { updateGlobalSettings } from '../../actions/settings';
@@ -23,17 +23,8 @@ export default class TopBarComponent extends React.Component<TopBarProps> {
             );
         };
 
-        let onChangeShowResolvedComments = (checked: boolean) => {
-            store.dispatch(
-                updateGlobalSettings({
-                    showResolvedComments: checked
-                })
-            );
-        };
-
         let {
             commentsEnabled,
-            showResolvedComments
         } = store.getState().settings;
 
         return (
@@ -45,14 +36,6 @@ export default class TopBarComponent extends React.Component<TopBarProps> {
                             label={strings.SHOW_COMMENTS}
                             onChange={onChangeCommentsEnabled}
                             checked={commentsEnabled}
-                        />
-                    </li>
-                    <li>
-                        <Checkbox
-                            id="show-resolved-comments"
-                            label={strings.SHOW_RESOLVED_COMMENTS}
-                            onChange={onChangeShowResolvedComments}
-                            checked={showResolvedComments}
                         />
                     </li>
                 </ul>

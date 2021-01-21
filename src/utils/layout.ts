@@ -63,7 +63,7 @@ export class LayoutController {
         } 
 
         if (!this.isDirty) {
-            return;
+            return false;
         }
 
         interface Block {
@@ -161,6 +161,8 @@ export class LayoutController {
         });
 
         this.isDirty = false;
+
+        return true
     }
 
     getCommentPosition(commentId: number) {
