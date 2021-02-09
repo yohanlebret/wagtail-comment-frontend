@@ -24,7 +24,7 @@ export interface CommentReply {
   author: Author | null;
   date: number;
   text: string;
-  editPreviousText: string;
+  newText: string;
   deleted: boolean;
 }
 
@@ -51,7 +51,7 @@ export function newCommentReply(
     author,
     date,
     text,
-    editPreviousText: '',
+    newText: '',
     deleted: false,
   };
 }
@@ -81,7 +81,7 @@ export interface Comment {
   text: string;
   replies: Map<number, CommentReply>;
   newReply: string;
-  editPreviousText: string;
+  newText: string;
   remoteReplyCount: number;
 }
 
@@ -116,7 +116,7 @@ export function newComment(
     text,
     replies,
     newReply: '',
-    editPreviousText: '',
+    newText: '',
     deleted: false,
     remoteReplyCount: Array.from(replies.values()).reduce(
       (n, reply) => (reply.remoteId !== null ? n + 1 : n),
