@@ -1,114 +1,114 @@
 .comment {
-    @include box;
+  @include box;
 
-    width: 100%;
-    max-width: 350px;
-    display: block;
-    border-radius: 5px;
-    transition: top 0.5s ease 0s, right 0.5s ease 0s, height 0.5s ease 0s;
-    pointer-events: auto;
+  width: 100%;
+  max-width: 350px;
+  display: block;
+  border-radius: 5px;
+  transition: top 0.5s ease 0s, right 0.5s ease 0s, height 0.5s ease 0s;
+  pointer-events: auto;
 
-    &--mode-creating {
-        padding: 10px;
+  &--mode-creating {
+    padding: 10px;
+  }
+
+  &__text {
+    color: $color-white;
+    font-size: 1em;
+    font-weight: bold;
+    margin-top: 12px;
+    margin-bottom: 0px;
+
+    &--mode-deleting {
+      color: $color-grey-1;
+    }
+  }
+
+  &__author-date {
+    color: $color-white;
+    font-size: 0.8em;
+    margin-top: 0px;
+    margin-bottom: 12px;
+  }
+
+  &--mode-deleting &__text,
+  &--mode-deleting &__author-date {
+    color: $color-grey-3;
+  }
+
+  &__replies {
+    list-style-type: none;
+    padding: 0;
+  }
+
+  &__button {
+    @include button;
+  }
+
+  &__actions &__button,
+  &__confirm-delete &__button,
+  &__reply-actions &__button {
+    height: 26px;
+    margin-right: 5px;
+    padding: 2px;
+    padding-bottom: 4px;
+    padding-left: 9px;
+    padding-right: 9px;
+    margin-top: 5px;
+    margin-right: 5px;
+  }
+
+  &__resolved {
+    float: right;
+  }
+
+  &__confirm-delete,
+  &__error {
+    color: $color-white;
+    font-weight: bold;
+    font-size: 0.8em;
+
+    button {
+      margin-left: 5px;
+      margin-right: 0px;
+    }
+  }
+
+  &__error {
+    background-color: $color-red-dark;
+    border-radius: 3px;
+    padding: 5px;
+    padding-left: 10px;
+    height: 26px;
+    line-height: 26px;
+    vertical-align: middle;
+
+    button {
+      float: right;
+      margin-left: 5px;
+      background-color: $color-red-very-dark;
+      border-color: $color-red-very-dark;
+      padding: 2px;
+      padding-left: 10px;
+      padding-right: 10px;
+      font-size: 0.9em;
+      font-weight: bold;
     }
 
-    &__text {
-        color: $color-white;
-        font-size: 1em;
-        font-weight: bold;
-        margin-top: 12px;
-        margin-bottom: 0px;
-
-        &--mode-deleting {
-            color: $color-grey-1;
-        }
+    &::after {
+      display: block;
+      content: '';
+      clear: both;
     }
+  }
 
-    &__author-date {
-        color: $color-white;
-        font-size: 0.8em;
-        margin-top: 0px;
-        margin-bottom: 12px;
-    }
+  &__progress {
+    color: $color-white;
+    font-weight: bold;
+    font-size: 0.8em;
+  }
 
-    &--mode-deleting &__text,
-    &--mode-deleting &__author-date {
-        color: $color-grey-3;
-    }
-
-    &__replies {
-        list-style-type: none;
-        padding: 0;
-    }
-
-    &__button {
-        @include button;
-    }
-
-    &__actions &__button,
-    &__confirm-delete &__button,
-    &__reply-actions &__button {
-        height: 26px;
-        margin-right: 5px;
-        padding: 2px;
-        padding-bottom: 4px;
-        padding-left: 9px;
-        padding-right: 9px;
-        margin-top: 5px;
-        margin-right: 5px;
-    }
-
-    &__resolved {
-        float: right;
-    }
-
-    &__confirm-delete,
-    &__error {
-        color: $color-white;
-        font-weight: bold;
-        font-size: 0.8em;
-
-        button {
-            margin-left: 5px;
-            margin-right: 0px;
-        }
-    }
-
-    &__error {
-        background-color: $color-red-dark;
-        border-radius: 3px;
-        padding: 5px;
-        padding-left: 10px;
-        height: 26px;
-        line-height: 26px;
-        vertical-align: middle;
-
-        button {
-            float: right;
-            margin-left: 5px;
-            background-color: $color-red-very-dark;
-            border-color: $color-red-very-dark;
-            padding: 2px;
-            padding-left: 10px;
-            padding-right: 10px;
-            font-size: 0.9em;
-            font-weight: bold;
-        }
-
-        &::after {
-            display: block;
-            content: '';
-            clear: both;
-        }
-    }
-
-    &__progress {
-        color: $color-white;
-        font-weight: bold;
-        font-size: 0.8em;
-    }
-
-    &__reply-input {
-        margin-top: 20px !important;
-    }
+  &__reply-input {
+    margin-top: 20px !important;
+  }
 }

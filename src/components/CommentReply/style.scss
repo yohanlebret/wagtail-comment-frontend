@@ -1,98 +1,98 @@
 .comment-reply {
-    margin-top: 20px;
-    border-left: 5px solid $color-textarea-background;
-    padding-left: 7px;
-    pointer-events: auto;
+  margin-top: 20px;
+  border-left: 5px solid $color-textarea-background;
+  padding-left: 7px;
+  pointer-events: auto;
 
-    &__text {
-        color: $color-white;
-        font-size: 1em;
-        font-weight: bold;
-        margin-top: 12px;
-        margin-bottom: 0px;
+  &__text {
+    color: $color-white;
+    font-size: 1em;
+    font-weight: bold;
+    margin-top: 12px;
+    margin-bottom: 0px;
 
-        &--mode-deleting {
-            color: $color-grey-1;
-        }
+    &--mode-deleting {
+      color: $color-grey-1;
     }
+  }
 
-    &__author-date {
-        color: $color-white;
-        font-size: 0.8em;
-        margin-top: 0px;
-        margin-bottom: 12px;
+  &__author-date {
+    color: $color-white;
+    font-size: 0.8em;
+    margin-top: 0px;
+    margin-bottom: 12px;
+  }
+
+  &--mode-deleting &__text,
+  &--mode-deleting &__author-date {
+    color: $color-grey-3;
+  }
+
+  &__button {
+    @include button;
+  }
+
+  &__actions,
+  &__confirm-delete,
+  &__progress,
+  &__error {
+    &::after {
+      display: block;
+      content: '';
+      clear: both;
     }
+  }
 
-    &--mode-deleting &__text,
-    &--mode-deleting &__author-date {
-        color: $color-grey-3;
+  &__actions &__button,
+  &__confirm-delete &__button {
+    height: 26px;
+    margin-right: 5px;
+    padding: 2px;
+    padding-bottom: 4px;
+    padding-left: 9px;
+    padding-right: 9px;
+    margin-top: 5px;
+    margin-right: 5px;
+  }
+
+  &__confirm-delete,
+  &__error {
+    color: $color-white;
+    font-weight: bold;
+    font-size: 0.8em;
+
+    button {
+      margin-left: 5px;
+      margin-right: 0px;
     }
+  }
 
-    &__button {
-        @include button;
+  &__error {
+    background-color: $color-red-dark;
+    border-radius: 3px;
+    padding: 5px;
+    padding-left: 10px;
+    height: 26px;
+    line-height: 26px;
+    vertical-align: middle;
+
+    button {
+      float: right;
+      margin-left: 5px;
+      background-color: $color-red-very-dark;
+      border-color: $color-red-very-dark;
+      padding: 2px;
+      padding-left: 10px;
+      padding-right: 10px;
+      font-size: 0.9em;
+      font-weight: bold;
+      line-height: 0;
     }
+  }
 
-    &__actions,
-    &__confirm-delete,
-    &__progress,
-    &__error {
-        &::after {
-            display: block;
-            content: '';
-            clear: both;
-        }
-    }
-
-    &__actions &__button,
-    &__confirm-delete &__button {
-        height: 26px;
-        margin-right: 5px;
-        padding: 2px;
-        padding-bottom: 4px;
-        padding-left: 9px;
-        padding-right: 9px;
-        margin-top: 5px;
-        margin-right: 5px;
-    }
-
-    &__confirm-delete,
-    &__error {
-        color: $color-white;
-        font-weight: bold;
-        font-size: 0.8em;
-
-        button {
-            margin-left: 5px;
-            margin-right: 0px;
-        }
-    }
-
-    &__error {
-        background-color: $color-red-dark;
-        border-radius: 3px;
-        padding: 5px;
-        padding-left: 10px;
-        height: 26px;
-        line-height: 26px;
-        vertical-align: middle;
-
-        button {
-            float: right;
-            margin-left: 5px;
-            background-color: $color-red-very-dark;
-            border-color: $color-red-very-dark;
-            padding: 2px;
-            padding-left: 10px;
-            padding-right: 10px;
-            font-size: 0.9em;
-            font-weight: bold;
-            line-height: 0;
-        }
-    }
-
-    &__progress {
-        color: $color-white;
-        font-weight: bold;
-        font-size: 0.8em;
-    }
+  &__progress {
+    color: $color-white;
+    font-weight: bold;
+    font-size: 0.8em;
+  }
 }

@@ -1,43 +1,40 @@
 import * as actions from '../actions/settings';
 import type { Author } from './comments';
-
-type Partial<T> = {
-    [P in keyof T]?: T[P];
-};
+import { update } from './utils';
 
 export interface SettingsState {
-    user: Author | null;
-    commentsEnabled: boolean;
-    showResolvedComments: boolean;
+  user: Author | null;
+  commentsEnabled: boolean;
+  showResolvedComments: boolean;
 }
 
 export type SettingsStateUpdate = Partial<SettingsState>;
 
-function initialState(): SettingsState {
-    return {
-        user: null,
-        commentsEnabled: true,
-        showResolvedComments: false
-    };
-}
-
-function update<T>(base: T, update: Partial<T>): T {
-    return Object.assign({}, base, update);
+export function initialState(): SettingsState {
+  return {
+    user: null,
+    commentsEnabled: true,
+    showResolvedComments: false,
+  };
 }
 
 export function reducer(
-    state: SettingsState | undefined,
-    action: actions.Action
+  state: SettingsState | undefined,
+  action: actions.Action
 ) {
-    if (typeof state === 'undefined') {
-        state = initialState();
-    }
+  let newState = state;
+  if (typeof state === 'undefined') {
+    newState = initialState();
+  }
 
-    switch (action.type) {
-        case actions.UPDATE_GLOBAL_SETTINGS:
-            state = update(state, action.update);
-            break;
-    }
+  switch (action.type) {
+  case actions.UPDATE_GLOBAL_SETTINGS:
+    newState = update(state, action.update);
+    break;
 
-    return state;
+  default:
+    // Do nothing (linting wants this to be explicit)
+  }
+
+  return newState;
 }
